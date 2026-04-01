@@ -1,0 +1,20 @@
+{
+  "frameWidth": 96,
+  "frameHeight": 80,
+  "players": {
+    "stem_cell": {
+      "file": "sprites/stem_cell.png",
+      "cols": 8,
+      "rows": 1,
+      "anims": { "walk": 0, "idle": 0 }
+    }
+  },
+  "enemies": {
+    "bacteria": {
+      "file": "sprites/bacteria.png",
+      "cols": 8,
+      "rows": 1,
+      "anims": { "idle": 0, "attack": 0 }
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "enemies": [
+    {
+      "id": "bacteria",
+      "name": "E. COLI",
+      "fullName": "Escherichia coli",
+      "type": "Gram-Negative Bacterium",
+      "threat": "LOW",
+      "color": "#ef4444",
+      "lines": [
+        "Gram-negative rod. Loves the gut, hates the bloodstream. When it escapes the intestine, your complement system tears holes in its outer membrane before you even arrive — no skill required.",
+        "Your Phagocytose works via opsonization: complement fragments coat the bacterium like a target marker, and you engulf the whole package. It never sees you coming. The flagellum that propels it is also what your pattern recognition receptors (PRRs) flag first.",
+        "Fires straight because it has one trick: motility. Predictable. A simple organism that only becomes dangerous in huge numbers — or in a body that can't fight back."
+      ],
+      "counteredBy": ["neutrophil", "macrophage"],
+      "attackNote": "Straight-line projectiles. Predictable trajectory — one row move and you are safe the entire attack."
+    },
+    {
+      "id": "bacteria2",
+      "name": "STAPH",
+      "fullName": "Staphylococcus aureus",
+      "type": "Gram-Positive Bacterium",
+      "threat": "MODERATE",
+      "color": "#f87171",
+      "lines": [
+        "Gram-positive. That thick peptidoglycan wall means complement has a harder time — there is no outer membrane to punch holes through. You have to engulf it directly, the old-fashioned way.",
+        "Biofilm is its superpower. It anchors colonies to surfaces and creates a protective matrix that antibiotics cannot penetrate. Inside the body it coats damaged tissue and implants, becoming invisible to surveillance.",
+        "Spreads three attack vectors when cornered. That is not aggression — that is desperation. A panicked Staph colony dumps toxins in every direction hoping something lands."
+      ],
+      "counteredBy": ["neutrophil", "macrophage"],
+      "attackNote": "Three-way spread on special. The center shot is the dangerous one. Strafe before the burst."
+    },
+    {
+      "id": "virus",
+      "name": "RHINOVIRUS",
+      "fullName": "Human Rhinovirus (HRV)",
+      "type": "Positive-Sense ssRNA Virus",
+      "threat": "LOW",
+      "color": "#fb923c",
+      "lines": [
+        "The common cold. No cure — not because we cannot try — but because it has over 160 serotypes and mutates its surface proteins constantly. Your B-Cell Memory Tag can barely keep up with one variant before a new face appears.",
+        "It hijacks the ICAM-1 receptor on your nasal epithelial cells. Once inside, it replicates using your cell's own ribosomes, producing thousands of copies in under six hours. The cell bursts. The cycle repeats.",
+        "Five-vector spread mimics antigenic drift in action: each shot is a variant launched from a single burst cell. Fast. Annoying. One billion infections per year on Earth — the most successful pathogen you will ever fight."
+      ],
+      "counteredBy": ["nk_cell", "t_cell"],
+      "attackNote": "Rapid five-shot spread. Center your row and two outer shots miss entirely. The danger is the sheer fire rate."
+    },
+    {
+      "id": "virus2",
+      "name": "INFLUENZA",
+      "fullName": "Influenza A (H1N1)",
+      "type": "Segmented Negative-Sense ssRNA Virus",
+      "threat": "MODERATE",
+      "color": "#fdba74",
+      "lines": [
+        "Eight genome segments that can independently shuffle between strains. One pig cell co-infected by two different flu viruses produces a hybrid that neither immune system recognizes. That is antigenic shift — and it is why the 1918 pandemic killed 50 million people.",
+        "Hemagglutinin binds your respiratory cells. Neuraminidase helps new viral particles escape the dying cell. Both proteins change every season through antigenic drift. This is why you need a new flu shot every year and why last year's immunity is never enough.",
+        "The second attack wave comes faster and hits a different row. That is not programming — that is the neuraminidase cascade: viral particles flooding out of the cell in every direction simultaneously."
+      ],
+      "counteredBy": ["nk_cell", "t_cell", "b_cell"],
+      "attackNote": "Second wave is faster than the first. Keep moving — standing still after dodging wave one is how you die."
+    },
+    {
+      "id": "superbug",
+      "name": "MRSA",
+      "fullName": "Methicillin-Resistant Staphylococcus aureus",
+      "type": "Drug-Resistant Gram-Positive Bacterium",
+      "threat": "CRITICAL",
+      "color": "#fbbf24",
+      "lines": [
+        "This one earned its name. MRSA carries the mecA gene — it produces a modified penicillin-binding protein that beta-lactam antibiotics (penicillin, methicillin, amoxicillin, all of them) cannot bind. Every antibiotic humanity developed over 60 years bounces off its surface.",
+        "Complement CANNOT touch it. It expresses Protein A on its surface, which binds immunoglobulins backwards — neutralizing the opsonization that normally marks bacteria for destruction. Your passive defenses are worthless here.",
+        "You are literally the last line of defense. Dendritic Cell antigen presentation followed by T-Cell execution is the only combination that reliably works. There is no drug. There is no shortcut. Just you."
+      ],
+      "counteredBy": ["dendritic", "t_cell"],
+      "attackNote": "Heavy straight shots. Complement does zero damage. Use Antigen Scan to strip DEF, then execute with T-Cell or NK Cell."
+    },
+    {
+      "id": "parasite",
+      "name": "PLASMODIUM",
+      "fullName": "Plasmodium falciparum",
+      "type": "Apicomplexan Protozoan Parasite",
+      "threat": "HIGH",
+      "color": "#a3e635",
+      "lines": [
+        "The malaria parasite. Multiple life stages: sporozoite (injected by mosquito), merozoite (bursts from red blood cells), gametocyte (waits to infect the next mosquito). Each stage has a different surface protein. Each requires a different immune response. It is not one enemy — it is four.",
+        "Merozoite Release is not a metaphor. When a parasitized red blood cell lyses, it releases 16 to 32 new merozoites simultaneously. Each can infect a new cell within seconds. The synchronized timing of this bursting is what causes malaria's characteristic fever spikes.",
+        "Eosinophil triples damage because it evolved specifically for large parasites. The Major Basic Protein (MBP) it dumps at close range punches cytotoxic holes through parasite membranes that antibodies and phagocytosis cannot reach."
+      ],
+      "counteredBy": ["eosinophil"],
+      "attackNote": "Merozoites track your row after launch. Eosinophil triples all damage — always bring it to this fight."
+    },
+    {
+      "id": "fungus",
+      "name": "CANDIDA",
+      "fullName": "Candida albicans",
+      "type": "Dimorphic Opportunistic Fungus",
+      "threat": "MODERATE",
+      "color": "#c084fc",
+      "lines": [
+        "Normally harmless — it lives in your gut and on skin in yeast form. But drop immune defenses (chemotherapy, HIV, broad-spectrum antibiotics) and it switches to hyphal form: long filaments that grow through tissue, invading organs.",
+        "The spore cloud pattern is accurate. Candida disperses via aerosolized conidia and hyphal fragments that scatter in unpredictable arcs. The spores settle wherever they find warm, moist, immunocompromised surface — which, in a sick body, is everywhere.",
+        "Complement and Neutrophils handle it in healthy tissue. The real danger is in immunosuppressed patients. You are not fighting Candida because you are weak. You are fighting it because someone else already is."
+      ],
+      "counteredBy": ["neutrophil", "macrophage"],
+      "attackNote": "Spore arcs drift slowly and randomly. You have time to read their trajectory. The danger is the cloud volume — three or four spores in the same second."
+    }
+  ]
+}
