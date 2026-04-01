@@ -244,81 +244,114 @@ canvas { image-rendering: pixelated; display: block; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
 /* ════════════════════════════════════════════════════════
-   CONTROLS BAR — MOBA-style layout
-   D-pad on LEFT, skill buttons on RIGHT
+   CONTROLS OVERLAY — floating HUD elements (PUBG-style)
+   Absolutely positioned over the game viewport.
    ════════════════════════════════════════════════════════ */
 #controls-bar {
-  width: 100%; flex-shrink: 0;
-  background: rgba(14,14,28,0.97);
-  border-top: 1px solid var(--border);
-  display: flex; align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px; gap: 6px;
-  min-height: clamp(110px, 28vw, 140px);
+  position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 15;
 }
+#controls-bar > * { pointer-events: auto; }
 
-/* D-Pad — LEFT side */
+/* ── AAA D-PAD ── */
 #dpad-container {
-  flex-shrink: 0;
-  width: clamp(100px, 26vw, 128px);
-  height: clamp(100px, 26vw, 128px);
+  position: absolute; bottom: 10px; left: 10px;
+  width: clamp(120px, 30vw, 160px);
+  height: clamp(120px, 30vw, 160px);
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr;
   gap: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(94,234,212,0.04) 0%, rgba(10,10,18,0.7) 70%);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 0 20px rgba(94,234,212,0.08), inset 0 0 30px rgba(0,0,0,0.4);
+  border: 2px solid rgba(94,234,212,0.15);
+  padding: 4px;
 }
 .dpad-btn {
-  border: none; border-radius: 5px;
-  background: rgba(94,234,212,0.07);
-  color: var(--accent);
-  font-size: clamp(15px, 4vw, 22px);
+  border: none; border-radius: 8px;
+  background: linear-gradient(135deg, rgba(94,234,212,0.12) 0%, rgba(94,234,212,0.03) 100%);
+  color: rgba(94,234,212,0.7);
+  font-size: clamp(16px, 4vw, 24px);
   font-weight: 900;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  touch-action: manipulation;
+  cursor: pointer; touch-action: manipulation;
+  transition: all 0.08s ease-out;
+  text-shadow: 0 0 8px rgba(94,234,212,0.4);
 }
+.dpad-btn[data-direction="up"]    { border-radius: 10px 10px 4px 4px; clip-path: polygon(20% 100%, 50% 10%, 80% 100%); background: linear-gradient(180deg, rgba(94,234,212,0.18) 0%, rgba(94,234,212,0.04) 100%); }
+.dpad-btn[data-direction="down"]  { border-radius: 4px 4px 10px 10px; clip-path: polygon(20% 0%, 50% 90%, 80% 0%); background: linear-gradient(0deg, rgba(94,234,212,0.18) 0%, rgba(94,234,212,0.04) 100%); }
+.dpad-btn[data-direction="left"]  { border-radius: 10px 4px 4px 10px; clip-path: polygon(100% 20%, 10% 50%, 100% 80%); background: linear-gradient(90deg, rgba(94,234,212,0.18) 0%, rgba(94,234,212,0.04) 100%); }
+.dpad-btn[data-direction="right"] { border-radius: 4px 10px 10px 4px; clip-path: polygon(0% 20%, 90% 50%, 0% 80%); background: linear-gradient(270deg, rgba(94,234,212,0.18) 0%, rgba(94,234,212,0.04) 100%); }
 .dpad-btn:active, .dpad-btn.pressed {
-  background: rgba(94,234,212,0.25);
+  background: rgba(94,234,212,0.35) !important;
+  filter: brightness(1.6);
+  text-shadow: 0 0 14px rgba(94,234,212,0.9);
+  transform: scale(0.92);
 }
 .dpad-center {
-  background: rgba(94,234,212,0.03);
+  background: radial-gradient(circle, rgba(94,234,212,0.12) 0%, transparent 70%);
   border-radius: 50%;
-  font-size: 8px; color: var(--text-dim);
+  font-size: 0; color: transparent;
+  box-shadow: 0 0 10px rgba(94,234,212,0.15);
+  border: 1px solid rgba(94,234,212,0.1);
 }
 
-/* Action buttons — RIGHT side, big circular MOBA skills */
+/* ── AAA ACTION BUTTONS (MORPH / MENU) ── */
 #action-buttons {
+  position: absolute; bottom: 14px; right: 10px;
   display: flex; align-items: center;
-  gap: 8px; flex-shrink: 0;
+  gap: 8px; flex-direction: column;
 }
 .action-btn {
-  border-radius: 5px;
-  border: 1.5px solid var(--border);
-  background: rgba(255,255,255,0.02);
+  border-radius: 22px;
+  border: 2px solid rgba(255,255,255,0.12);
+  background: linear-gradient(135deg, rgba(20,20,40,0.85) 0%, rgba(10,10,24,0.95) 100%);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   font-family: var(--font-pixel);
-  font-size: clamp(9px, 2.3vw, 11px);
+  font-size: clamp(10px, 2.5vw, 12px);
   font-weight: 700; cursor: pointer;
   white-space: nowrap; transition: all 0.1s;
   color: var(--text); position: relative;
   overflow: hidden;
-  padding: 6px 10px;
+  padding: 10px 18px;
+  letter-spacing: 1.5px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 .action-btn:active:not([disabled]) {
-  background: rgba(94,234,212,0.12);
-  border-color: var(--accent);
+  transform: scale(0.93);
+  filter: brightness(1.3);
 }
 .action-btn[disabled] { opacity: 0.3; pointer-events: none; }
-.action-btn.morph-btn { border-color: rgba(167,139,250,0.3); color: #a78bfa; }
-.action-btn.base-btn { border-color: rgba(167,139,250,0.3); color: #a78bfa; }
-.action-btn.flee-btn { border-color: rgba(248,113,113,0.3); color: #f87171; padding: 4px 8px; font-size: 9px; }
+.action-btn.morph-btn {
+  border-color: rgba(167,139,250,0.35);
+  color: #c4b5fd;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4), 0 0 15px rgba(167,139,250,0.12), inset 0 1px 0 rgba(167,139,250,0.15);
+  text-shadow: 0 0 8px rgba(167,139,250,0.5);
+}
+.action-btn.base-btn {
+  border-color: rgba(167,139,250,0.35);
+  color: #c4b5fd;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4), 0 0 15px rgba(167,139,250,0.12), inset 0 1px 0 rgba(167,139,250,0.15);
+  text-shadow: 0 0 8px rgba(167,139,250,0.5);
+}
+.action-btn.flee-btn {
+  border-color: rgba(248,113,113,0.3);
+  color: #fca5a5;
+  padding: 8px 14px; font-size: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(248,113,113,0.1), inset 0 1px 0 rgba(248,113,113,0.1);
+  text-shadow: 0 0 6px rgba(248,113,113,0.4);
+}
 
-/* Big circular skill buttons */
+/* ── AAA SKILL CIRCLES ── */
 .skill-circle {
-  width: clamp(52px, 14vw, 68px);
-  height: clamp(52px, 14vw, 68px);
+  width: clamp(56px, 15vw, 74px);
+  height: clamp(56px, 15vw, 74px);
   border-radius: 50%;
-  border: 3px solid rgba(94,234,212,0.5);
-  background: rgba(94,234,212,0.08);
+  border: 3px solid rgba(94,234,212,0.45);
+  background: radial-gradient(circle at 40% 35%, rgba(94,234,212,0.14) 0%, rgba(10,10,24,0.9) 70%);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   cursor: pointer; position: relative;
@@ -326,37 +359,80 @@ canvas { image-rendering: pixelated; display: block; }
   font-family: var(--font-pixel);
   touch-action: manipulation;
   transition: all 0.1s;
+  box-shadow: 0 0 18px rgba(94,234,212,0.1), 0 2px 8px rgba(0,0,0,0.5), inset 0 0 12px rgba(94,234,212,0.06);
+}
+.skill-circle::before {
+  content: ''; position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(94,234,212,0.12);
+  pointer-events: none;
 }
 .skill-circle:active:not(.on-cooldown) {
-  background: rgba(94,234,212,0.25);
+  background: radial-gradient(circle at 50% 50%, rgba(94,234,212,0.35) 0%, rgba(94,234,212,0.08) 70%);
   border-color: #5eead4;
-  transform: scale(0.92);
+  transform: scale(0.90);
+  box-shadow: 0 0 28px rgba(94,234,212,0.3), 0 2px 8px rgba(0,0,0,0.5);
 }
 .skill-circle.on-cooldown {
-  opacity: 0.4;
-  border-color: rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.03);
+  opacity: 0.35;
+  border-color: rgba(255,255,255,0.1);
+  background: radial-gradient(circle, rgba(30,30,50,0.9) 0%, rgba(10,10,20,0.95) 100%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
 .skill-circle .skill-name {
   font-size: clamp(7px, 1.8vw, 9px);
   font-weight: 700; color: #5eead4;
   text-align: center; line-height: 1.1;
   pointer-events: none;
+  text-shadow: 0 0 6px rgba(94,234,212,0.5);
 }
 .skill-circle .skill-cd {
   font-size: clamp(12px, 3.5vw, 16px);
   font-weight: 700; color: #fff;
   pointer-events: none;
+  text-shadow: 0 0 8px rgba(255,255,255,0.4);
 }
 .skill-circle .cd-sweep {
   position: absolute; top: 0; left: 0;
   width: 100%; height: 100%;
   border-radius: 50%;
   background: conic-gradient(
-    rgba(0,0,0,0.6) var(--cd-pct, 0%),
+    rgba(0,0,0,0.65) var(--cd-pct, 0%),
     transparent var(--cd-pct, 0%)
   );
   pointer-events: none;
+}
+
+/* ── HUD EDIT MODE ── */
+.hud-editing { outline: 2px dashed rgba(251,191,36,0.5) !important; outline-offset: 4px; cursor: move !important; }
+#hud-edit-overlay {
+  display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4); z-index: 100;
+  flex-direction: column; align-items: center; justify-content: flex-start;
+  padding-top: 8px; pointer-events: auto;
+}
+#hud-edit-overlay.active { display: flex; }
+#hud-edit-overlay .edit-label {
+  font-family: var(--font-pixel); font-size: 11px; color: #fbbf24;
+  letter-spacing: 2px; padding: 4px 14px; border-radius: 4px;
+  background: rgba(0,0,0,0.7); border: 1px solid rgba(251,191,36,0.3);
+  margin-bottom: 6px;
+}
+#hud-edit-overlay .edit-done-btn {
+  font-family: var(--font-pixel); font-size: 12px; color: #111;
+  background: #fbbf24; border: none; padding: 8px 28px; border-radius: 20px;
+  font-weight: 700; cursor: pointer; letter-spacing: 2px;
+}
+.hud-resize-handle {
+  position: absolute; top: -18px; right: -18px;
+  display: none; gap: 2px; z-index: 101;
+}
+.hud-editing .hud-resize-handle { display: flex; }
+.hud-resize-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(251,191,36,0.9); color: #111;
+  border: none; font-size: 14px; font-weight: 900;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 
 /* ════════════════════════════════════════════════════════
@@ -543,22 +619,15 @@ canvas { image-rendering: pixelated; display: block; }
   .menu-button { padding: 7px 0; margin: 3px auto; width: min(200px, 50vw); font-size: 10px; }
   .title-footer { margin-top: 4px; font-size: 7px; }
 
-  /* ── Controls bar: 60px total on 375px tall screen ── */
-  #controls-bar {
-    min-height: 60px; max-height: 66px;
-    padding: 4px 10px;
-  }
-  .skill-circle {
-    width: 34px; height: 34px;
-    border-width: 2px;
-  }
+  /* ── Controls: compact sizes for small landscape ── */
+  #dpad-container { width: 90px; height: 90px; bottom: 4px; left: 4px; padding: 2px; border-width: 1px; }
+  .dpad-btn { font-size: 12px; }
+  .skill-circle { width: 42px; height: 42px; border-width: 2px; }
+  .skill-circle::before { inset: -2px; }
   .skill-circle .skill-name { font-size: 5px; }
-  .skill-circle .skill-cd { font-size: 8px; }
-  #dpad-container { width: 52px; height: 52px; }
-  .dpad-btn { font-size: 11px; }
-  .dpad-center { font-size: 5px; }
-  #action-buttons { gap: 4px; }
-  .action-btn { padding: 4px 7px; font-size: 8px; }
+  .skill-circle .skill-cd { font-size: 9px; }
+  #action-buttons { gap: 5px; bottom: 8px; right: 6px; }
+  .action-btn { padding: 6px 12px; font-size: 9px; }
 
   /* ── HUD bar: very compact, no wrapping ── */
   #game-hud { padding: 1px 6px; flex-wrap: nowrap; }
@@ -808,6 +877,37 @@ canvas { image-rendering: pixelated; display: block; }
   </div>
 </div>
 
+<!-- Global Settings Panel (accessible from title + in-game) -->
+<div id="settings-panel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,10,18,0.97);z-index:200;flex-direction:column;overflow-y:auto;">
+  <div class="overlay-header">
+    <h2>SETTINGS</h2>
+    <button class="close-button" id="close-settings-btn">X</button>
+  </div>
+  <div class="overlay-body" id="settings-body" style="max-width:340px;margin:0 auto;">
+    <div style="margin:14px 0;">
+      <div style="font-size:12px;color:#a78bfa;letter-spacing:2px;font-weight:700;margin-bottom:8px;">SOUND VOLUME</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:10px;color:#666;">OFF</span>
+        <input type="range" id="settings-volume" min="0" max="100" value="100" style="flex:1;accent-color:#a78bfa;">
+        <span style="font-size:10px;color:#666;">MAX</span>
+        <span id="settings-volume-val" style="font-size:11px;color:#a78bfa;width:32px;text-align:right;">100%</span>
+      </div>
+    </div>
+    <div style="margin:14px 0;">
+      <div style="font-size:12px;color:#5eead4;letter-spacing:2px;font-weight:700;margin-bottom:8px;">VIBRATION</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="menu-button secondary" id="settings-haptic-btn" style="width:160px;padding:8px 0;font-size:11px;">ON</button>
+        <span style="font-size:10px;color:#666;">Haptic feedback for D-pad and combat</span>
+      </div>
+    </div>
+    <div style="margin:20px 0 8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;">
+      <div style="font-size:12px;color:#fbbf24;letter-spacing:2px;font-weight:700;margin-bottom:10px;">HUD LAYOUT</div>
+      <button class="menu-button primary" id="btn-edit-hud" style="margin:6px auto;width:100%;">EDIT HUD LAYOUT</button>
+      <button class="menu-button secondary" id="btn-reset-hud" style="margin:6px auto;width:100%;">RESET TO DEFAULT</button>
+    </div>
+  </div>
+</div>
+
 <!-- RPG Dialogue Screen -->
 <div id="rpg-dialogue-screen">
   <div id="rpg-bg"></div>
@@ -844,6 +944,7 @@ canvas { image-rendering: pixelated; display: block; }
     <button class="menu-button primary" id="btn-new-game">NEW GAME</button>
     <button class="menu-button secondary" id="btn-continue">CONTINUE</button>
     <button class="menu-button tertiary" id="btn-codex">CODEX</button>
+    <button class="menu-button secondary" id="btn-title-settings" style="margin-top:6px;">SETTINGS</button>
   </div>
   <div class="title-footer">A BIOLOGY RPG — ALL SCIENCE IS REAL</div>
 </div>
@@ -906,21 +1007,42 @@ canvas { image-rendering: pixelated; display: block; }
       </div>
       <div class="overlay-body" id="base-body"></div>
     </div>
-  </div>
 
-  <div id="controls-bar">
-    <div id="dpad-container">
-      <div></div>
-      <button class="dpad-btn" data-direction="up">&#9650;</button>
-      <div></div>
-      <button class="dpad-btn" data-direction="left">&#9664;</button>
-      <div class="dpad-btn dpad-center">+</div>
-      <button class="dpad-btn" data-direction="right">&#9654;</button>
-      <div></div>
-      <button class="dpad-btn" data-direction="down">&#9660;</button>
-      <div></div>
+    <!-- In-game menu overlay (pause menu) -->
+    <div class="overlay-panel" id="ingame-menu-panel">
+      <div class="overlay-header">
+        <h2>MENU</h2>
+        <button class="close-button" id="close-ingame-menu-btn">X</button>
+      </div>
+      <div class="overlay-body" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:20px;">
+        <button class="menu-button primary" id="ingame-settings-btn" style="width:260px;">SETTINGS</button>
+        <button class="menu-button secondary" id="ingame-title-btn" style="width:260px;">BACK TO TITLE</button>
+      </div>
     </div>
-    <div id="action-buttons"></div>
+
+    <!-- Controls overlay (absolute-positioned over viewport) -->
+    <div id="controls-bar">
+      <div id="dpad-container">
+        <div class="hud-resize-handle"><button class="hud-resize-btn" data-resize="dpad" data-dir="-">-</button><button class="hud-resize-btn" data-resize="dpad" data-dir="+">+</button></div>
+        <div></div>
+        <button class="dpad-btn" data-direction="up">&#9650;</button>
+        <div></div>
+        <button class="dpad-btn" data-direction="left">&#9664;</button>
+        <div class="dpad-btn dpad-center"></div>
+        <button class="dpad-btn" data-direction="right">&#9654;</button>
+        <div></div>
+        <button class="dpad-btn" data-direction="down">&#9660;</button>
+        <div></div>
+      </div>
+      <div id="action-buttons">
+        <div class="hud-resize-handle"><button class="hud-resize-btn" data-resize="actions" data-dir="-">-</button><button class="hud-resize-btn" data-resize="actions" data-dir="+">+</button></div>
+      </div>
+      <!-- HUD Edit Mode overlay -->
+      <div id="hud-edit-overlay">
+        <div class="edit-label">DRAG TO MOVE &bull; +/- TO RESIZE</div>
+        <button class="edit-done-btn" id="hud-edit-done">DONE</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2413,6 +2535,28 @@ const Audio = {
     if (this.ctx) return;
     try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
     catch (e) {}
+    this.loadSettings();
+  },
+
+  // Settings — persisted to localStorage
+  masterVolume: 1.0,   // 0.0 to 1.0
+  hapticEnabled: true,
+
+  loadSettings() {
+    try {
+      const s = JSON.parse(localStorage.getItem('biocell_settings'));
+      if (s) {
+        if (s.volume != null) this.masterVolume = s.volume;
+        if (s.haptic != null) this.hapticEnabled = s.haptic;
+      }
+    } catch(e) {}
+  },
+
+  saveSettings() {
+    localStorage.setItem('biocell_settings', JSON.stringify({
+      volume: this.masterVolume,
+      haptic: this.hapticEnabled,
+    }));
   },
 
   unlock() {
@@ -2429,13 +2573,13 @@ const Audio = {
   },
 
   tone(freq, duration, vol = 0.07, type = 'square') {
-    if (!this.ctx) return;
+    if (!this.ctx || this.masterVolume <= 0) return;
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = type;
     osc.frequency.setValueAtTime(freq, now);
-    gain.gain.setValueAtTime(vol, now);
+    gain.gain.setValueAtTime(vol * this.masterVolume, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
@@ -2444,16 +2588,13 @@ const Audio = {
   },
 
   // Haptic feedback (Vibration API — Android only, fails silently elsewhere)
-  // D-pad: axis-coded timing signatures
-  //   Vertical   = single pulse  (tap feel)    — up short, down longer
-  //   Horizontal = double pulse  (slide feel)  — left tight gap, right wide gap
-  hapticUp()    { try { navigator.vibrate(12); } catch(e){} },
-  hapticDown()  { try { navigator.vibrate(25); } catch(e){} },
-  hapticLeft()  { try { navigator.vibrate([10, 15, 10]); } catch(e){} },
-  hapticRight() { try { navigator.vibrate([10, 30, 10]); } catch(e){} },
-  // Combat
-  hapticHit()   { try { navigator.vibrate(80); } catch(e){} },
-  hapticSkill() { try { navigator.vibrate([25, 40, 50]); } catch(e){} },
+  _vibrate(pattern) { if (this.hapticEnabled) try { navigator.vibrate(pattern); } catch(e){} },
+  hapticUp()    { this._vibrate(12); },
+  hapticDown()  { this._vibrate(25); },
+  hapticLeft()  { this._vibrate([10, 15, 10]); },
+  hapticRight() { this._vibrate([10, 30, 10]); },
+  hapticHit()   { this._vibrate(80); },
+  hapticSkill() { this._vibrate([25, 40, 50]); },
 
   sfxStep()       { this.tone(400, 0.03, 0.025); },
   sfxHit()        { this.tone(180, 0.08, 0.05, 'sawtooth'); this.hapticHit(); },
@@ -2633,6 +2774,236 @@ const Codex = {
    ║  Isometric overworld + MMBN-style battle system               ║
    ╚═══════════════════════════════════════════════════════════════╝ */
 
+/* ═══════════════════════════════════════════════════════
+   HUD LAYOUT EDITOR — PUBG-style drag-to-move, resize, persist
+   ═══════════════════════════════════════════════════════ */
+const HudEditor = {
+  STORAGE_KEY: 'biocell_hud_layout',
+  editing: false,
+  dragging: null,
+  dragOffset: { x: 0, y: 0 },
+
+  // Elements that can be moved/resized
+  elements: {
+    dpad:    { el: () => document.getElementById('dpad-container'),  defaults: { x: 10, y: null, size: 1.0, anchor: 'bottom-left' } },
+    actions: { el: () => document.getElementById('action-buttons'),  defaults: { x: null, y: null, size: 1.0, anchor: 'bottom-right' } },
+  },
+
+  load() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(this.STORAGE_KEY)) || {}; } catch(e) {}
+    Object.keys(this.elements).forEach(key => {
+      const def = this.elements[key].defaults;
+      const s = saved[key] || {};
+      const el = this.elements[key].el();
+      if (!el) return;
+      const size = s.size || def.size;
+      el.style.transform = `scale(${size})`;
+      el.style.transformOrigin = def.anchor === 'bottom-right' ? 'bottom right' : 'bottom left';
+      if (s.x != null) el.style.left = s.x + 'px';
+      if (s.y != null) el.style.bottom = s.y + 'px';
+      if (s.right != null) { el.style.right = s.right + 'px'; el.style.left = 'auto'; }
+    });
+  },
+
+  save() {
+    const data = {};
+    Object.keys(this.elements).forEach(key => {
+      const el = this.elements[key].el();
+      if (!el) return;
+      const transform = el.style.transform;
+      const sizeMatch = transform && transform.match(/scale\(([^)]+)\)/);
+      data[key] = {
+        x: el.style.left !== 'auto' && el.style.left ? parseInt(el.style.left) : null,
+        y: el.style.bottom ? parseInt(el.style.bottom) : null,
+        right: el.style.right !== 'auto' && el.style.right ? parseInt(el.style.right) : null,
+        size: sizeMatch ? parseFloat(sizeMatch[1]) : 1.0,
+      };
+    });
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+  },
+
+  reset() {
+    localStorage.removeItem(this.STORAGE_KEY);
+    Object.keys(this.elements).forEach(key => {
+      const el = this.elements[key].el();
+      if (!el) return;
+      el.style.transform = ''; el.style.left = ''; el.style.bottom = ''; el.style.right = '';
+    });
+    this.load(); // re-apply defaults
+  },
+
+  enterEditMode() {
+    this.editing = true;
+    document.getElementById('hud-edit-overlay').classList.add('active');
+    Object.keys(this.elements).forEach(key => {
+      const el = this.elements[key].el();
+      if (el) el.classList.add('hud-editing');
+    });
+    this._attachDragListeners();
+  },
+
+  exitEditMode() {
+    this.editing = false;
+    this.save();
+    document.getElementById('hud-edit-overlay').classList.remove('active');
+    Object.keys(this.elements).forEach(key => {
+      const el = this.elements[key].el();
+      if (el) el.classList.remove('hud-editing');
+    });
+    this._detachDragListeners();
+  },
+
+  _getPos(e) {
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX, y: t.clientY };
+  },
+
+  _onDown(e) {
+    if (!HudEditor.editing) return;
+    const pos = HudEditor._getPos(e);
+    // Find which element was grabbed
+    for (const key of Object.keys(HudEditor.elements)) {
+      const el = HudEditor.elements[key].el();
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      if (pos.x >= r.left && pos.x <= r.right && pos.y >= r.top && pos.y <= r.bottom) {
+        e.preventDefault(); e.stopPropagation();
+        HudEditor.dragging = key;
+        HudEditor.dragOffset = { x: pos.x - r.left, y: pos.y - r.top };
+        return;
+      }
+    }
+  },
+
+  _onMove(e) {
+    if (!HudEditor.dragging) return;
+    e.preventDefault();
+    const pos = HudEditor._getPos(e);
+    const el = HudEditor.elements[HudEditor.dragging].el();
+    const viewport = el.parentElement.parentElement; // game-viewport
+    const vr = viewport.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+
+    const newLeft = pos.x - vr.left - HudEditor.dragOffset.x;
+    const newBottom = vr.bottom - pos.y - (er.height - HudEditor.dragOffset.y);
+
+    el.style.left = Math.max(0, Math.min(newLeft, vr.width - er.width)) + 'px';
+    el.style.bottom = Math.max(0, Math.min(newBottom, vr.height - er.height)) + 'px';
+    el.style.right = 'auto';
+  },
+
+  _onUp() { HudEditor.dragging = null; },
+
+  _boundDown: null, _boundMove: null, _boundUp: null,
+  _attachDragListeners() {
+    this._boundDown = e => this._onDown(e);
+    this._boundMove = e => this._onMove(e);
+    this._boundUp = () => this._onUp();
+    document.addEventListener('mousedown', this._boundDown, true);
+    document.addEventListener('mousemove', this._boundMove, true);
+    document.addEventListener('mouseup', this._boundUp, true);
+    document.addEventListener('touchstart', this._boundDown, { capture: true, passive: false });
+    document.addEventListener('touchmove', this._boundMove, { capture: true, passive: false });
+    document.addEventListener('touchend', this._boundUp, true);
+  },
+  _detachDragListeners() {
+    document.removeEventListener('mousedown', this._boundDown, true);
+    document.removeEventListener('mousemove', this._boundMove, true);
+    document.removeEventListener('mouseup', this._boundUp, true);
+    document.removeEventListener('touchstart', this._boundDown, true);
+    document.removeEventListener('touchmove', this._boundMove, true);
+    document.removeEventListener('touchend', this._boundUp, true);
+  },
+
+  handleResize(targetKey, dir) {
+    const el = this.elements[targetKey] && this.elements[targetKey].el();
+    if (!el) return;
+    const transform = el.style.transform;
+    const m = transform && transform.match(/scale\(([^)]+)\)/);
+    let size = m ? parseFloat(m[1]) : 1.0;
+    size += (dir === '+' ? 0.1 : -0.1);
+    size = Math.max(0.5, Math.min(1.8, size));
+    el.style.transform = `scale(${size})`;
+  },
+
+  init() {
+    this.load();
+    // Resize buttons
+    document.querySelectorAll('.hud-resize-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        this.handleResize(btn.dataset.resize, btn.dataset.dir);
+      });
+      btn.addEventListener('touchend', e => {
+        e.preventDefault(); e.stopPropagation();
+        this.handleResize(btn.dataset.resize, btn.dataset.dir);
+      }, { passive: false });
+    });
+    // Done button
+    document.getElementById('hud-edit-done').addEventListener('click', () => this.exitEditMode());
+    // Settings panel buttons
+    const showSettings = () => { document.getElementById('settings-panel').style.display = 'flex'; };
+    const hideSettings = () => { document.getElementById('settings-panel').style.display = 'none'; };
+
+    document.getElementById('btn-edit-hud').addEventListener('click', () => {
+      hideSettings();
+      this.enterEditMode();
+    });
+    document.getElementById('btn-reset-hud').addEventListener('click', () => {
+      this.reset();
+      hideSettings();
+    });
+    document.getElementById('close-settings-btn').addEventListener('click', hideSettings);
+
+    // ── Volume slider ──
+    const volSlider = document.getElementById('settings-volume');
+    const volVal = document.getElementById('settings-volume-val');
+    volSlider.value = Math.round(Audio.masterVolume * 100);
+    volVal.textContent = volSlider.value + '%';
+    volSlider.addEventListener('input', () => {
+      Audio.masterVolume = parseInt(volSlider.value) / 100;
+      volVal.textContent = volSlider.value + '%';
+      Audio.saveSettings();
+    });
+
+    // ── Haptic toggle ──
+    const hapticBtn = document.getElementById('settings-haptic-btn');
+    const updateHapticBtn = () => {
+      hapticBtn.textContent = Audio.hapticEnabled ? 'ON' : 'OFF';
+      hapticBtn.style.borderColor = Audio.hapticEnabled ? 'rgba(94,234,212,0.4)' : 'rgba(248,113,113,0.3)';
+      hapticBtn.style.color = Audio.hapticEnabled ? '#5eead4' : '#f87171';
+    };
+    updateHapticBtn();
+    hapticBtn.addEventListener('click', () => {
+      Audio.hapticEnabled = !Audio.hapticEnabled;
+      updateHapticBtn();
+      Audio.saveSettings();
+    });
+
+    // ── In-game menu buttons ──
+    document.getElementById('close-ingame-menu-btn').addEventListener('click', () => {
+      document.getElementById('ingame-menu-panel').classList.remove('visible');
+    });
+    document.getElementById('ingame-settings-btn').addEventListener('click', () => {
+      document.getElementById('ingame-menu-panel').classList.remove('visible');
+      document.getElementById('settings-panel').style.display = 'flex';
+    });
+    document.getElementById('ingame-title-btn').addEventListener('click', () => {
+      document.getElementById('ingame-menu-panel').classList.remove('visible');
+      Game.saveGame();
+      Game.isRunning = false;
+      Game.isInBattle = false;
+      Game.showScreen('title-screen');
+    });
+
+    // ── Title screen settings button ──
+    document.getElementById('btn-title-settings').addEventListener('click', () => {
+      document.getElementById('settings-panel').style.display = 'flex';
+    });
+  },
+};
+
 const Game = {
   // ═══ State ═══
   player: null,
@@ -2717,6 +3088,9 @@ const Game = {
 
     // Load codex data asynchronously
     Codex.load();
+
+    // HUD layout editor
+    HudEditor.init();
 
     this.setupDpad();
     this.setupViewportTap();
@@ -3688,15 +4062,12 @@ const Game = {
       container.appendChild(baseBtn);
     }
 
-    // Menu button — save and return to title
+    // Menu button — opens in-game menu overlay
     const menuBtn = document.createElement('button');
     menuBtn.className = 'action-btn flee-btn';
     menuBtn.textContent = 'MENU';
     menuBtn.addEventListener('click', () => {
-      this.saveGame();
-      this.isRunning = false;
-      this.isInBattle = false;
-      this.showScreen('title-screen');
+      document.getElementById('ingame-menu-panel').classList.add('visible');
     });
     container.appendChild(menuBtn);
   },
