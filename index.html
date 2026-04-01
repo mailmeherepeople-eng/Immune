@@ -529,44 +529,6 @@ canvas { image-rendering: pixelated; display: block; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 /* ════════════════════════════════════════════════════════
-   PORTRAIT OVERLAY — rotate device prompt
-   ════════════════════════════════════════════════════════ */
-#portrait-overlay {
-  display: none;
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: #0a0a12; z-index: 9999;
-  flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 20px;
-}
-@media (orientation: portrait) {
-  #portrait-overlay { display: flex; }
-}
-.portrait-phone {
-  width: 44px; height: 70px;
-  border: 3px solid #a78bfa; border-radius: 8px;
-  margin-bottom: 20px; position: relative;
-  animation: phoneRotate 2.4s ease-in-out infinite;
-}
-.portrait-phone::after {
-  content: ''; position: absolute;
-  bottom: 6px; left: 50%; transform: translateX(-50%);
-  width: 14px; height: 4px; border-radius: 2px; background: #a78bfa;
-}
-@keyframes phoneRotate {
-  0%, 25% { transform: rotate(0deg); }
-  65%, 90% { transform: rotate(-90deg); }
-  100% { transform: rotate(0deg); }
-}
-.portrait-title {
-  font-size: 16px; color: #a78bfa; font-weight: 700;
-  letter-spacing: 3px; margin-bottom: 8px;
-}
-.portrait-sub {
-  font-size: 10px; color: var(--text-dim); line-height: 2;
-  letter-spacing: 1px;
-}
-
-/* ════════════════════════════════════════════════════════
    LANDSCAPE COMPACT — iPhone SE & small landscape screens
    ════════════════════════════════════════════════════════ */
 @media (max-height: 430px) and (orientation: landscape) {
@@ -860,12 +822,6 @@ canvas { image-rendering: pixelated; display: block; }
   </div>
 </div>
 
-<!-- Portrait overlay -->
-<div id="portrait-overlay">
-  <div class="portrait-phone"></div>
-  <div class="portrait-title">ROTATE DEVICE</div>
-  <div class="portrait-sub">BIOCELL CHRONICLES<br>requires landscape mode</div>
-</div>
 
 <!-- ══════════════════════════════════════════════════════
      TITLE SCREEN
@@ -2485,9 +2441,21 @@ const Audio = {
     osc.stop(now + duration);
   },
 
+  // Haptic feedback (Vibration API — Android only, fails silently elsewhere)
+  // D-pad: axis-coded timing signatures
+  //   Vertical   = single pulse  (tap feel)    — up short, down longer
+  //   Horizontal = double pulse  (slide feel)  — left tight gap, right wide gap
+  hapticUp()    { try { navigator.vibrate(12); } catch(e){} },
+  hapticDown()  { try { navigator.vibrate(25); } catch(e){} },
+  hapticLeft()  { try { navigator.vibrate([10, 15, 10]); } catch(e){} },
+  hapticRight() { try { navigator.vibrate([10, 30, 10]); } catch(e){} },
+  // Combat
+  hapticHit()   { try { navigator.vibrate(80); } catch(e){} },
+  hapticSkill() { try { navigator.vibrate([25, 40, 50]); } catch(e){} },
+
   sfxStep()       { this.tone(400, 0.03, 0.025); },
-  sfxHit()        { this.tone(180, 0.08, 0.05, 'sawtooth'); },
-  sfxSkill()      { this.tone(440, 0.05, 0.04); this.tone(660, 0.07, 0.035); },
+  sfxHit()        { this.tone(180, 0.08, 0.05, 'sawtooth'); this.hapticHit(); },
+  sfxSkill()      { this.tone(440, 0.05, 0.04); this.tone(660, 0.07, 0.035); this.hapticSkill(); },
   sfxHeal()       { this.tone(523, 0.08, 0.04, 'sine'); this.tone(659, 0.1, 0.035, 'sine'); },
   sfxKill()       { this.tone(330, 0.04, 0.05); this.tone(523, 0.08, 0.04); this.tone(784, 0.12, 0.03, 'sine'); },
   sfxMorph()      { this.tone(440, 0.06, 0.04, 'sine'); this.tone(880, 0.12, 0.035, 'sine'); },
@@ -3349,6 +3317,9 @@ const Game = {
       this.playerGridX = newX;
       this.playerGridY = newY;
       Audio.sfxStep();
+      // Directional haptic — axis-coded: vertical=single tap, horizontal=double tap
+      const hapticMap = { up: 'hapticUp', down: 'hapticDown', left: 'hapticLeft', right: 'hapticRight' };
+      if (hapticMap[direction]) Audio[hapticMap[direction]]();
       this.handleTileStep(this.mapGrid[newY][newX], newY, newX);
       this.rebuildActionButtons();
     };
@@ -3852,6 +3823,8 @@ const Game = {
     if (newRow >= 0 && newRow < 4 && newCol >= 0 && newCol < 4) {
       bp.gridRow = newRow;
       bp.gridCol = newCol;
+      const hm = { up: 'hapticUp', down: 'hapticDown', left: 'hapticLeft', right: 'hapticRight' };
+      if (hm[direction]) Audio[hm[direction]]();
     }
   },
 
