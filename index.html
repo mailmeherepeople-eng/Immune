@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
 <title>BioCell Chronicles</title>
 <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -2690,8 +2692,17 @@ const Game = {
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
 
-    document.getElementById('btn-new-game').addEventListener('click', () => this.newGame());
-    document.getElementById('btn-continue').addEventListener('click', () => this.continueGame());
+    // Request fullscreen on first game interaction (hides browser chrome on mobile)
+    const goFullscreen = () => {
+      const el = document.documentElement;
+      const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if (rfs && !document.fullscreenElement && !document.webkitFullscreenElement) {
+        rfs.call(el).catch(() => {});
+      }
+    };
+
+    document.getElementById('btn-new-game').addEventListener('click', () => { goFullscreen(); this.newGame(); });
+    document.getElementById('btn-continue').addEventListener('click', () => { goFullscreen(); this.continueGame(); });
     document.getElementById('btn-codex').addEventListener('click', () => Codex.open('title-screen'));
     document.getElementById('close-morph-btn').addEventListener('click', () => this.closeMorph());
     document.getElementById('close-base-btn').addEventListener('click', () => this.closeBase());
@@ -5079,7 +5090,11 @@ const Game = {
    ║  SECTION 5: BOOT                                             ║
    ╚═══════════════════════════════════════════════════════════════╝ */
 
-window.addEventListener('DOMContentLoaded', () => Game.init());
+window.addEventListener('DOMContentLoaded', () => {
+  // Lock to landscape silently — fails gracefully on desktop/unsupported browsers
+  try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
+  Game.init();
+});
 
 window.addEventListener('resize', () => {
   if (Game.isRunning) {

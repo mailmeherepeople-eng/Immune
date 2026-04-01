@@ -1,0 +1,9 @@
+{
+  "name": "BioCell Chronicles",
+  "short_name": "BioCell",
+  "start_url": "/index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0a0a12",
+  "theme_color": "#0a0a12"
+}

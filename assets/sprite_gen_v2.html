@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>BioCell Sprite Gen v2 — High Quality</title>
+<style>
+  body { background: #0a0a12; color: #eee; font-family: monospace; padding: 20px; }
+  h1 { color: #a78bfa; } h2 { color: #5eead4; margin-top: 30px; }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; margin: 10px 0; }
+  .card { background: #1a1a2e; border: 1px solid #333; padding: 10px; border-radius: 8px; text-align: center; }
+  .card canvas { display: block; image-rendering: pixelated; margin: 0 auto 6px; background: repeating-conic-gradient(#1a1a2e 0% 25%, #12121e 0% 50%) 50% / 12px 12px; }
+  .card .name { font-size: 12px; color: #a78bfa; font-weight: bold; }
+  .card .dims { font-size: 10px; color: #555; }
+  button { background: #7c3aed; color: white; border: none; padding: 12px 28px; border-radius: 6px; font-size: 14px; cursor: pointer; margin: 6px 4px; font-family: monospace; }
+  button:hover { background: #6d28d9; }
+  .info { color: #888; font-size: 12px; margin: 8px 0; }
+</style>
+</head><body>
+<h1>BioCell Sprite Generator v2</h1>
+<p class="info">High-quality 96px sprites with auto-outline, proper shading, and unique silhouettes.<br>
+4 directions (down/left/right/up) x 4 walk frames = 16 frames per sheet.</p>
+<button onclick="downloadAll()">Download All PNGs</button>
+<button onclick="downloadManifest()">Download sprite-manifest.json</button>
+<div id="status" style="color:#5eead4;margin:10px 0;"></div>
+
+<h2>Player Morphs</h2>
+<div class="row" id="player-row"></div>
+
+<h2>Enemies</h2>
+<div class="row" id="enemy-row"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  PIXEL HELPERS
+// ═══════════════════════════════════════════════════════
+function px(ctx,gx,gy,s,c){ctx.fillStyle=c;ctx.fillRect(gx*s,gy*s,s,s);}
+function pxRect(ctx,gx,gy,gw,gh,s,c){ctx.fillStyle=c;ctx.fillRect(gx*s,gy*s,gw*s,gh*s);}
+function pxCircle(ctx,cx,cy,r,s,c){ctx.fillStyle=c;for(let y=cy-r;y<=cy+r;y++)for(let x=cx-r;x<=cx+r;x++)if((x-cx)*(x-cx)+(y-cy)*(y-cy)<=r*r)ctx.fillRect(x*s,y*s,s,s);}
+function pxOval(ctx,cx,cy,rx,ry,s,c){ctx.fillStyle=c;for(let y=cy-ry;y<=cy+ry;y++)for(let x=cx-rx;x<=cx+rx;x++){const dx=(x-cx)/rx,dy=(y-cy)/ry;if(dx*dx+dy*dy<=1)ctx.fillRect(x*s,y*s,s,s);}}
+
+// ═══════════════════════════════════════════════════════
+//  AUTO OUTLINE — adds 1px dark outline around all opaque pixels
+// ═══════════════════════════════════════════════════════
+function autoOutline(canvas, color) {
+  const w = canvas.width, h = canvas.height;
+  const ctx = canvas.getContext('2d');
+  const src = ctx.getImageData(0, 0, w, h);
+  // Parse outline color
+  const tmp = document.createElement('canvas'); tmp.width=1; tmp.height=1;
+  const tc = tmp.getContext('2d'); tc.fillStyle = color; tc.fillRect(0,0,1,1);
+  const [cr,cg,cb] = tc.getImageData(0,0,1,1).data;
+  // Find outline pixels
+  const out = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      if (src.data[i+3] > 0) continue;
+      for (const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]]) {
+        const nx = x+dx, ny = y+dy;
+        if (nx>=0 && nx<w && ny>=0 && ny<h && src.data[(ny*w+nx)*4+3] > 0) {
+          out[i]=cr; out[i+1]=cg; out[i+2]=cb; out[i+3]=255; break;
+        }
+      }
+    }
+  }
+  // Draw outline behind, then original on top
+  const outImg = new ImageData(out, w, h);
+  const result = document.createElement('canvas'); result.width=w; result.height=h;
+  const rctx = result.getContext('2d');
+  rctx.putImageData(outImg, 0, 0);
+  rctx.drawImage(canvas, 0, 0);
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════
+//  IMPROVED SPRITE SYSTEM
+//  Better proportions, shading, walk cycle
+// ═══════════════════════════════════════════════════════
+const S = {
+  wf(t) { return Math.floor((t||0)/5)%4; },
+
+  // Enhanced body with proper shading and proportions
+  body(ctx, s, wf, dir, p) {
+    // p = { main, light, dark, shadow, belt, skin, legM, legL, legD }
+    if (dir==='left'){ctx.save();ctx.translate(s*16,0);ctx.scale(-1,1);}
+    const bob = wf===2 ? 1 : 0;
+
+    if (dir==='down'||dir==='up') {
+      // Torso — wider shoulders, tapered waist
+      pxRect(ctx, 3, 7+bob, 10, 1, s, p.light);  // shoulder line (highlight)
+      pxRect(ctx, 4, 8+bob, 8, 3, s, p.main);    // torso body
+      pxRect(ctx, 5, 8+bob, 3, 2, s, p.light);   // left highlight
+      pxRect(ctx, 8, 9+bob, 3, 2, s, p.dark);    // right shadow
+      // Belt
+      pxRect(ctx, 4, 11+bob, 8, 1, s, p.belt);
+      px(ctx, 7, 11+bob, s, p.light);             // belt buckle
+
+      // Arms with swing
+      if (wf===1) {
+        // Right arm forward, left arm back
+        pxRect(ctx, 2, 7+bob, 2, 4, s, p.dark);
+        px(ctx, 2, 11+bob, s, p.skin);            // left hand back
+        pxRect(ctx, 12, 6+bob, 2, 4, s, p.main);
+        px(ctx, 12, 10+bob, s, p.skin);           // right hand forward
+      } else if (wf===3) {
+        pxRect(ctx, 2, 6+bob, 2, 4, s, p.main);
+        px(ctx, 2, 10+bob, s, p.skin);
+        pxRect(ctx, 12, 7+bob, 2, 4, s, p.dark);
+        px(ctx, 12, 11+bob, s, p.skin);
+      } else {
+        pxRect(ctx, 2, 7+bob, 2, 4, s, p.main);
+        px(ctx, 2, 11+bob, s, p.skin);
+        pxRect(ctx, 12, 7+bob, 2, 4, s, p.main);
+        px(ctx, 12, 11+bob, s, p.skin);
+      }
+
+      // Legs with proper stride
+      if (wf===1) {
+        pxRect(ctx, 5, 12, 3, 3, s, p.legM);     // left leg
+        pxRect(ctx, 4, 15, 4, 1, s, p.legD);      // left foot
+        pxRect(ctx, 9, 12, 3, 2, s, p.legL);      // right leg (lifted)
+        pxRect(ctx, 9, 14, 3, 1, s, p.legD);
+      } else if (wf===3) {
+        pxRect(ctx, 5, 12, 3, 2, s, p.legL);
+        pxRect(ctx, 5, 14, 3, 1, s, p.legD);
+        pxRect(ctx, 9, 12, 3, 3, s, p.legM);
+        pxRect(ctx, 9, 15, 4, 1, s, p.legD);
+      } else {
+        pxRect(ctx, 5, 12, 3, 3, s, p.legM);
+        pxRect(ctx, 5, 15, 3, 1, s, p.legD);
+        pxRect(ctx, 9, 12, 3, 3, s, p.legM);
+        pxRect(ctx, 9, 15, 3, 1, s, p.legD);
+      }
+    } else {
+      // Side view — right facing
+      pxRect(ctx, 6, 7+bob, 5, 1, s, p.light);   // shoulder
+      pxRect(ctx, 6, 8+bob, 5, 3, s, p.main);    // torso
+      pxRect(ctx, 7, 8+bob, 2, 2, s, p.light);   // highlight
+      pxRect(ctx, 9, 9+bob, 2, 2, s, p.dark);    // shadow
+      pxRect(ctx, 6, 11+bob, 5, 1, s, p.belt);
+      // Arms
+      if (wf===1||wf===3) {
+        pxRect(ctx, 11, 7+bob, 2, 3, s, wf===1?p.main:p.dark);
+        px(ctx, 12, 10+bob, s, p.skin);
+        px(ctx, 5, 8+bob, s, wf===1?p.dark:p.main);
+        px(ctx, 5, 9+bob, s, wf===1?p.dark:p.main);
+      } else {
+        pxRect(ctx, 11, 7+bob, 2, 3, s, p.main);
+        px(ctx, 12, 10+bob, s, p.skin);
+        px(ctx, 5, 8+bob, s, p.dark);
+      }
+      // Legs — side stride
+      if (wf===1) {
+        pxRect(ctx, 8, 12, 3, 3, s, p.legM);
+        pxRect(ctx, 9, 15, 3, 1, s, p.legD);
+        px(ctx, 6, 12, s, p.legL); px(ctx, 6, 13, s, p.legL);
+      } else if (wf===3) {
+        px(ctx, 6, 12, s, p.legM); px(ctx, 6, 13, s, p.legM); px(ctx, 6, 14, s, p.legM);
+        pxRect(ctx, 5, 15, 3, 1, s, p.legD);
+        pxRect(ctx, 8, 12, 2, 2, s, p.legL);
+      } else {
+        pxRect(ctx, 7, 12, 3, 3, s, p.legM);
+        pxRect(ctx, 7, 15, 3, 1, s, p.legD);
+      }
+    }
+    if (dir==='left') ctx.restore();
+  },
+
+  // Enhanced head — bigger eyes, better hair, neck
+  head(ctx, s, bob, dir, p) {
+    // p = { head, headL, headD, hair, hairH, eyeW, eyeP, mouth }
+    if (dir==='left'){ctx.save();ctx.translate(s*16,0);ctx.scale(-1,1);}
+
+    if (dir==='down') {
+      // Hair top
+      pxRect(ctx, 5, 0+bob, 6, 2, s, p.hair);
+      px(ctx, 4, 1+bob, s, p.hair); px(ctx, 11, 1+bob, s, p.hair);
+      px(ctx, 6, 0+bob, s, p.hairH); px(ctx, 7, 0+bob, s, p.hairH); // highlight
+      // Face
+      pxRect(ctx, 4, 2+bob, 8, 5, s, p.head);
+      px(ctx, 3, 3+bob, s, p.head); px(ctx, 12, 3+bob, s, p.head); // ears
+      // Shading
+      px(ctx, 4, 2+bob, s, p.headL); px(ctx, 5, 2+bob, s, p.headL); // forehead highlight
+      px(ctx, 10, 5+bob, s, p.headD); px(ctx, 11, 5+bob, s, p.headD); // jaw shadow
+      // Eyes — 2x2 with highlight
+      pxRect(ctx, 5, 3+bob, 2, 2, s, p.eyeW);
+      px(ctx, 6, 4+bob, s, p.eyeP);  // left pupil
+      px(ctx, 5, 3+bob, s, '#fff');   // left highlight
+      pxRect(ctx, 9, 3+bob, 2, 2, s, p.eyeW);
+      px(ctx, 10, 4+bob, s, p.eyeP); // right pupil
+      px(ctx, 9, 3+bob, s, '#fff');   // right highlight
+      // Mouth
+      px(ctx, 7, 6+bob, s, p.mouth); px(ctx, 8, 6+bob, s, p.mouth);
+      // Neck
+      pxRect(ctx, 7, 7+bob, 2, 1, s, p.headD);
+    } else if (dir==='up') {
+      // Hair — very prominent from behind
+      pxRect(ctx, 4, 0+bob, 8, 3, s, p.hair);
+      px(ctx, 3, 1+bob, s, p.hair); px(ctx, 12, 1+bob, s, p.hair);
+      px(ctx, 5, 0+bob, s, p.hairH); px(ctx, 6, 0+bob, s, p.hairH);
+      // Back of head
+      pxRect(ctx, 4, 3+bob, 8, 4, s, p.head);
+      pxRect(ctx, 4, 2+bob, 8, 2, s, p.hair); // hair covers top
+      px(ctx, 4, 4+bob, s, p.hair); px(ctx, 11, 4+bob, s, p.hair); // wisps
+      px(ctx, 3, 3+bob, s, p.head); px(ctx, 12, 3+bob, s, p.head); // ears
+      pxRect(ctx, 7, 7+bob, 2, 1, s, p.headD);
+    } else {
+      // Side profile (right-facing)
+      // Hair mass behind
+      pxRect(ctx, 4, 0+bob, 4, 5, s, p.hair);
+      px(ctx, 3, 1+bob, s, p.hair); px(ctx, 3, 2+bob, s, p.hair);
+      px(ctx, 3, 3+bob, s, p.hair);
+      px(ctx, 5, 0+bob, s, p.hairH);
+      // Face
+      pxRect(ctx, 7, 1+bob, 5, 5, s, p.head);
+      px(ctx, 6, 2+bob, s, p.head); px(ctx, 6, 3+bob, s, p.head);
+      // Light/shadow
+      px(ctx, 7, 1+bob, s, p.headL); px(ctx, 8, 1+bob, s, p.headL);
+      px(ctx, 11, 5+bob, s, p.headD);
+      // Eye
+      px(ctx, 10, 2+bob, s, '#fff');
+      px(ctx, 11, 2+bob, s, p.eyeP);
+      px(ctx, 10, 3+bob, s, p.eyeW);
+      px(ctx, 11, 3+bob, s, p.eyeP);
+      // Nose
+      px(ctx, 12, 3+bob, s, p.headL); px(ctx, 13, 3+bob, s, p.head);
+      // Mouth
+      px(ctx, 12, 5+bob, s, p.mouth);
+      // Neck
+      pxRect(ctx, 8, 6+bob, 2, 1, s, p.headD);
+    }
+    if (dir==='left') ctx.restore();
+  },
+};
+
+// ═══════════════════════════════════════════════════════
+//  CHARACTER DEFINITIONS
+// ═══════════════════════════════════════════════════════
+
+const chars = {
+  stem_cell(ctx, size, frame, dir) {
+    const s=size/16, wf=S.wf(frame), bob=wf===2?1:0;
+    const bp={main:'#7c3aed',light:'#a78bfa',dark:'#5b21b6',shadow:'#4c1d95',belt:'#6d28d9',skin:'#c4b5fd',legM:'#5b21b6',legL:'#7c3aed',legD:'#4c1d95'};
+    const hp={head:'#c4b5fd',headL:'#ddd6fe',headD:'#a78bfa',hair:'#e9d5ff',hairH:'#f5f3ff',eyeW:'#ede9fe',eyeP:'#3b0764',mouth:'#7c3aed'};
+    S.body(ctx,s,wf,dir,bp); S.head(ctx,s,bob,dir,hp);
+    // Nucleus crown above head
+    if (dir==='down'||dir==='up') {
+      px(ctx,6,0,s,'#e9d5ff'); px(ctx,7,0,s,'#f5f3ff'); px(ctx,8,0,s,'#f5f3ff'); px(ctx,9,0,s,'#e9d5ff');
+      px(ctx,5,0,s,'#c4b5fd'); px(ctx,10,0,s,'#c4b5fd');
+    }
+    // Orbiting sparkles
+    const sparks=['#f0abfc','#67e8f9','#fde68a'];
+    for(let i=0;i<3;i++){
+      const a=(frame||0)*0.07+(Math.PI*2/3)*i;
+      const ox=Math.round(8+Math.cos(a)*6),oy=Math.round(8+Math.sin(a)*5);
+      if(ox>=0&&ox<16&&oy>=0&&oy<16) px(ctx,ox,oy,s,sparks[i]);
+    }
+  },
+
+  neutrophil(ctx, size, frame, dir) {
+    const s=size/16, wf=S.wf(frame), bob=wf===2?1:0;
+    const bp={main:'#2563eb',light:'#3b82f6',dark:'#1d4ed8',shadow:'#1e3a8a',belt:'#1e40af',skin:'#bfdbfe',legM:'#1e40af',legL:'#2563eb',legD:'#1e3a8a'};
+    const hp={head:'#60a5fa',headL:'#93c5fd',headD:'#3b82f6',hair:'#bfdbfe',hairH:'#dbeafe',eyeW:'#dbeafe',eyeP:'#172554',mouth:'#1e40af'};
+    S.body(ctx,s,wf,dir,bp); S.head(ctx,s,bob,dir,hp);
+    // 3-lobe nucleus visor — large and prominent
+    if (dir==='down') {
+      pxRect(ctx,4,1+bob,3,2,s,'#93c5fd'); pxRect(ctx,9,1+bob,3,2,s,'#93c5fd');
+      pxRect(ctx,7,0+bob,2,2,s,'#bfdbfe');
+      px(ctx,6,0+bob,s,'#60a5fa'); px(ctx,9,0+bob,s,'#60a5fa');
+    }
+    // Granule armor dots
+    px(ctx,5,8,s,'#93c5fd'); px(ctx,10,9,s,'#93c5fd');
+    px(ctx,7,9,s,'#60a5fa'); px(ctx,9,8,s,'#bfdbfe');
+    // Shoulder pads
+    if(dir==='down'||dir==='up'){px(ctx,2,7,s,'#3b82f6');px(ctx,13,7,s,'#3b82f6');}
+  },
+
+  macrophage(ctx, size, frame, dir) {
+    const s=size/16, wf=S.wf(frame), bob=wf===2?1:0;
+    const bp={main:'#7c3aed',light:'#a855f7',dark:'#6d28d9',shadow:'#4c1d95',belt:'#581c87',skin:'#d8b4fe',legM:'#581c87',legL:'#6d28d9',legD:'#3b0764'};
+    const hp={head:'#a855f7',headL:'#c084fc',headD:'#7c3aed',hair:'#d8b4fe',hairH:'#e9d5ff',eyeW:'#e9d5ff',eyeP:'#1a0a2e',mouth:'#6d28d9'};
+    S.body(ctx,s,wf,dir,bp); S.head(ctx,s,bob,dir,hp);
+    // Wide armored shoulders + extra body width
+    if(dir==='down'||dir==='up'){
+      px(ctx,1,7,s,'#6d28d9');px(ctx,1,8,s,'#581c87');
+      px(ctx,14,7,s,'#6d28d9');px(ctx,14,8,s,'#581c87');
+      // Wide head
+      px(ctx,2,3+bob,s,hp.head);px(ctx,2,4+bob,s,hp.head);
+      px(ctx,13,3+bob,s,hp.head);px(ctx,13,4+bob,s,hp.head);
+    }
+    // Vacuole circles on torso
+    px(ctx,6,8,s,'#c084fc'); px(ctx,9,9,s,'#d8b4fe');
+    px(ctx,8,8,s,'#e9d5ff'); px(ctx,7,10,s,'#c084fc');
+  },
+
+  nk_cell(ctx, size, frame, dir) {
+    const s=size/16, wf=S.wf(frame), bob=wf===2?1:0;
+    const bp={main:'#dc2626',light:'#ef4444',dark:'#b91c1c',shadow:'#991b1b',belt:'#7f1d1d',skin:'#fecaca',legM:'#991b1b',legL:'#b91c1c',legD:'#7f1d1d'};
+    const hp={head:'#ef4444',headL:'#f87171',headD:'#dc2626',hair:'#450a0a',hairH:'#7f1d1d',eyeW:'#fef2f2',eyeP:'#fca5a5',mouth:'#991b1b'};
+    S.body(ctx,s,wf,dir,bp); S.head(ctx,s,bob,dir,hp);
+    // Targeting crosshair visor — bright red, very visible
+    if(dir==='down'){
+      px(ctx,5,2+bob,s,'#fca5a5');px(ctx,4,3+bob,s,'#fca5a5');px(ctx,7,3+bob,s,'#fca5a5');
+      px(ctx,10,2+bob,s,'#fca5a5');px(ctx,8,3+bob,s,'#fca5a5');px(ctx,11,3+bob,s,'#fca5a5');
+    }
+    // Perforin belt ammo
+    px(ctx,5,11,s,'#fca5a5'); px(ctx,7,11,s,'#fca5a5');
+    px(ctx,9,11,s,'#fca5a5'); px(ctx,11,11,s,'#fca5a5');
+    // Blade
+    if(dir==='right'||dir==='left'){
+      const bx=dir==='right'?13:2;
+      px(ctx,bx,6,s,'#fca5a5');px(ctx,bx,5,s,'#fee2e2');
+    }
+  },
+
+  b_cell(ctx, size, frame, dir) {
+    const s=size/16, wf=S.wf(frame), bob=wf===2?1:0;
+    const bp={main:'#0891b2',light:'#06b6d4',dark:'#0e7490',shadow:'#155e75',belt:'#164e63',skin:'#a5f3fc',legM:'#0e7490',legL:'#0891b2',legD:'#164e63'};
+    const hp={head:'#22d3ee',headL:'#67e8f9',headD:'#06b6d4',hair:'#a5f3fc',hairH:'#cffafe',eyeW:'#cffafe',eyeP:'#083344',mouth:'#0e7490'};
+    S.body(ctx,s,wf,dir,bp); S.head(ctx,s,bob,dir,hp);
+    // Y-antibody antennae — tall and prominent
+    if(dir==='down'||dir==='up'){
+      px(ctx,8,0,s,'#67e8f9');                     // center stem
+      px(ctx,7,0,s,'#22d3ee'); px(ctx,9,0,s,'#22d3ee');
+      px(ctx,5,0,s,'#a5f3fc'); px(ctx,11,0,s,'#a5f3fc'); // Y tips
+      px(ctx,6,0,s,'#67e8f9'); px(ctx,10,0,s,'#67e8f9');
+    }
+    // Y-badge on chest
+    px(ctx,8,8,s,'#67e8f9'); px(ctx,7,9,s,'#22d3ee');
+    px(ctx,9,9,s,'#22d3ee'); px(ctx,8,10,s,'#a5f3fc');
+    // Antibody orb in hand
+    if(dir==='down'){px(ctx,13,11,s,'#67e8f9');px(ctx,14,11,s,'#a5f3fc');}
+  },
+
+  t_cell(ctx, size, frame, dir) {
+    const s=size/16, wf=S.wf(frame), bob=wf===2?1:0;
+    const bp={main:'#16a34a',light:'#22c55e',dark:'#15803d',shadow:'#166534',belt:'#14532d',skin:'#bbf7d0',legM:'#15803d',legL:'#16a34a',legD:'#14532d'};
+    const hp={head:'#4ade80',headL:'#86efac',headD:'#22c55e',hair:'#bbf7d0',hairH:'#dcfce7',eyeW:'#dcfce7',eyeP:'#052e16',mouth:'#15803d'};
+    S.body(ctx,s,wf,dir,bp); S.head(ctx,s,bob,dir,hp);
+    // T-badge — large, prominent
+    if(dir==='down'||dir==='up'){
+      pxRect(ctx,5,8,6,1,s,'#86efac');  // horizontal bar
+      pxRect(ctx,7,8,2,3,s,'#bbf7d0');  // vertical stem
+    }
+    // Execute blade — glowing green energy blade
+    if(dir==='right'){
+      px(ctx,13,7,s,'#4ade80');px(ctx,14,6,s,'#86efac');px(ctx,15,5,s,'#dcfce7');
+    }
+    if(dir==='left'){
+      px(ctx,2,7,s,'#4ade80');px(ctx,1,6,s,'#86efac');px(ctx,0,5,s,'#dcfce7');
+    }
+    // Spark marks
+    px(ctx,3,8,s,'#86efac'); px(ctx,12,9,s,'#86efac');
+  },
+
+  dendritic(ctx, size, frame, dir) {
+    const s=size/16, wf=S.wf(frame), bob=wf===2?1:0;
+    const bp={main:'#ca8a04',light:'#eab308',dark:'#a16207',shadow:'#92400e',belt:'#78350f',skin:'#fef3c7',legM:'#a16207',legL:'#ca8a04',legD:'#78350f'};
+    const hp={head:'#eab308',headL:'#fbbf24',headD:'#ca8a04',hair:'#fde68a',hairH:'#fef9c3',eyeW:'#fef9c3',eyeP:'#422006',mouth:'#92400e'};
+    S.body(ctx,s,wf,dir,bp); S.head(ctx,s,bob,dir,hp);
+    // Elaborate dendrite antlers — very tall branching projections
+    if(dir==='down'||dir==='up'){
+      // Left antler
+      px(ctx,4,1,s,'#fbbf24'); px(ctx,3,0,s,'#fde68a'); px(ctx,5,0,s,'#fde68a');
+      px(ctx,2,0,s,'#fbbf24'); px(ctx,1,0,s,'#fef9c3');
+      // Right antler
+      px(ctx,11,1,s,'#fbbf24'); px(ctx,10,0,s,'#fde68a'); px(ctx,12,0,s,'#fde68a');
+      px(ctx,13,0,s,'#fbbf24'); px(ctx,14,0,s,'#fef9c3');
+    }
+    // Scanner visor — gold bar across eyes
+    if(dir==='down'){
+      pxRect(ctx,4,3+bob,8,1,s,'#fbbf24');
+      px(ctx,5,3+bob,s,'#fde68a'); px(ctx,10,3+bob,s,'#fde68a');
+    }
+    // Scanner glow on torso
+    px(ctx,7,8,s,'#fde68a'); px(ctx,8,8,s,'#fef9c3'); px(ctx,9,9,s,'#fcd34d');
+  },
+
+  eosinophil(ctx, size, frame, dir) {
+    const s=size/16, wf=S.wf(frame), bob=wf===2?1:0;
+    const bp={main:'#ea580c',light:'#f97316',dark:'#c2410c',shadow:'#9a3412',belt:'#7c2d12',skin:'#fed7aa',legM:'#c2410c',legL:'#ea580c',legD:'#7c2d12'};
+    S.body(ctx,s,wf,dir,bp);
+    // Bi-lobed nucleus head — the defining eosinophil trait
+    if(dir==='down') {
+      // Two connected lobes
+      pxRect(ctx,3,1+bob,5,5,s,'#f97316');
+      pxRect(ctx,8,1+bob,5,5,s,'#f97316');
+      pxRect(ctx,6,2+bob,4,3,s,'#f97316');    // bridge
+      // Lobe divider
+      px(ctx,7,1+bob,s,'#7c2d12'); px(ctx,8,1+bob,s,'#7c2d12');
+      // Highlight
+      px(ctx,4,1+bob,s,'#fdba74'); px(ctx,5,1+bob,s,'#fdba74');
+      px(ctx,9,1+bob,s,'#fdba74'); px(ctx,10,1+bob,s,'#fdba74');
+      // Shadow
+      px(ctx,6,5+bob,s,'#c2410c'); px(ctx,9,5+bob,s,'#c2410c');
+      // Eyes
+      pxRect(ctx,4,3+bob,2,2,s,'#fee2e2');
+      px(ctx,5,4+bob,s,'#431407'); px(ctx,4,3+bob,s,'#fff');
+      pxRect(ctx,10,3+bob,2,2,s,'#fee2e2');
+      px(ctx,11,4+bob,s,'#431407'); px(ctx,10,3+bob,s,'#fff');
+      // Mouth
+      px(ctx,7,5+bob,s,'#9a3412'); px(ctx,8,5+bob,s,'#9a3412');
+      pxRect(ctx,7,6+bob,2,1,s,'#c2410c'); // neck
+    } else if(dir==='up') {
+      pxRect(ctx,3,1+bob,5,5,s,'#f97316');
+      pxRect(ctx,8,1+bob,5,5,s,'#f97316');
+      pxRect(ctx,6,2+bob,4,3,s,'#f97316');
+      px(ctx,7,1+bob,s,'#7c2d12'); px(ctx,8,1+bob,s,'#7c2d12');
+      px(ctx,4,1+bob,s,'#fdba74'); px(ctx,9,1+bob,s,'#fdba74');
+      pxRect(ctx,7,6+bob,2,1,s,'#c2410c');
+    } else {
+      const hp={head:'#f97316',headL:'#fdba74',headD:'#ea580c',hair:'#fdba74',hairH:'#fed7aa',eyeW:'#fee2e2',eyeP:'#431407',mouth:'#9a3412'};
+      S.head(ctx,s,bob,dir,hp);
+    }
+    // Chemical canister on back
+    if(dir==='right'){pxRect(ctx,4,7,2,3,s,'#fdba74');px(ctx,4,6,s,'#7c2d12');px(ctx,5,6,s,'#7c2d12');}
+    if(dir==='left'){pxRect(ctx,10,7,2,3,s,'#fdba74');px(ctx,10,6,s,'#7c2d12');px(ctx,11,6,s,'#7c2d12');}
+    // Granule dots
+    px(ctx,6,9,s,'#fdba74'); px(ctx,9,8,s,'#fed7aa'); px(ctx,8,10,s,'#fdba74');
+  },
+};
+
+// ═══════════════════════════════════════════════════════
+//  ENEMY SPRITES (same as current game)
+// ═══════════════════════════════════════════════════════
+const enemyChars = {
+  bacteria(ctx,size,frame,dir){const s=size/16,t=frame||0,wA=Math.sin(t*0.28)>0?0:1,wB=Math.sin(t*0.28+1.6)>0?0:-1;px(ctx,0,7+wB,s,'#fca5a5');px(ctx,1,7+wA,s,'#f87171');px(ctx,2,7,s,'#fca5a5');px(ctx,2,8,s,'#fca5a5');pxRect(ctx,3,6,10,5,s,'#7f1d1d');pxRect(ctx,4,5,8,7,s,'#991b1b');pxRect(ctx,4,6,8,5,s,'#b91c1c');pxRect(ctx,5,6,6,4,s,'#dc2626');pxRect(ctx,6,7,3,2,s,'#ef4444');px(ctx,3,5,s,'#991b1b');px(ctx,3,9,s,'#991b1b');px(ctx,12,5,s,'#991b1b');px(ctx,12,9,s,'#991b1b');px(ctx,7,8,s,'#fee2e2');px(ctx,9,7,s,'#fecaca');px(ctx,8,9,s,'#fecaca');px(ctx,6,8,s,'#fee2e2');px(ctx,5,7,s,'#fca5a5');px(ctx,10,8,s,'#fca5a5');px(ctx,11,7,s,'#f87171');px(ctx,6,4,s,'#f87171');px(ctx,9,4,s,'#f87171');px(ctx,7,11,s,'#f87171');px(ctx,10,11,s,'#f87171');},
+  bacteria2(ctx,size,frame,dir){const s=size/16,t=frame||0,pulse=Math.floor(t/10)%2;if(pulse){px(ctx,8,2,s,'#fca5a5');px(ctx,2,8,s,'#fca5a5');px(ctx,13,8,s,'#fca5a5');px(ctx,8,13,s,'#fca5a5');px(ctx,4,3,s,'#fecaca');px(ctx,12,3,s,'#fecaca');px(ctx,3,11,s,'#fecaca');px(ctx,12,11,s,'#fecaca');}pxCircle(ctx,8,8,6,s,'#7f1d1d');pxCircle(ctx,8,8,5,s,'#991b1b');pxCircle(ctx,8,8,4,s,'#b91c1c');pxCircle(ctx,8,8,3,s,'#dc2626');pxCircle(ctx,8,8,2,s,'#ef4444');px(ctx,7,6,s,'#fca5a5');px(ctx,6,7,s,'#fecaca');px(ctx,8,4,s,'#991b1b');px(ctx,8,12,s,'#991b1b');px(ctx,5,5,s,'#f87171');px(ctx,11,5,s,'#f87171');px(ctx,5,11,s,'#f87171');px(ctx,11,11,s,'#f87171');},
+  virus(ctx,size,frame,dir){const s=size/16,t=frame||0,alt=Math.floor(t/8)%2;pxCircle(ctx,8,8,4,s,'#9a3412');pxCircle(ctx,8,8,3,s,'#c2410c');pxCircle(ctx,8,8,2,s,'#ea580c');px(ctx,8,8,s,'#fb923c');px(ctx,7,7,s,'#fed7aa');px(ctx,8,7,s,'#fdba74');px(ctx,9,9,s,'#fdba74');px(ctx,7,9,s,'#fdba74');const sA=[[8,3],[8,13],[3,8],[13,8],[5,4],[11,4],[5,12],[11,12]],sB=[[8,3],[8,13],[3,8],[13,8],[4,5],[12,5],[4,11],[12,11]];(alt===0?sA:sB).forEach(([x,y])=>px(ctx,x,y,s,'#c2410c'));const tA=[[8,2],[8,14],[2,8],[14,8],[4,3],[12,3],[4,13],[12,13]],tB=[[8,2],[8,14],[2,8],[14,8],[3,4],[13,4],[3,12],[13,12]];(alt===0?tA:tB).forEach(([x,y])=>px(ctx,x,y,s,'#fed7aa'));},
+  virus2(ctx,size,frame,dir){const s=size/16,t=frame||0,ph=Math.floor(t/6)%4;pxOval(ctx,8,8,5,6,s,'#78350f');pxOval(ctx,8,8,4,5,s,'#92400e');pxOval(ctx,8,8,3,4,s,'#b45309');pxOval(ctx,8,8,2,3,s,'#d97706');px(ctx,8,8,s,'#f59e0b');const segs=[[7,7],[9,7],[8,6],[7,9],[9,9],[8,10],[6,8],[10,8]],ac=['#fed7aa','#fdba74','#fcd34d','#fde68a'];segs.forEach(([x,y],i)=>px(ctx,x,y,s,ac[(i+ph)%4]));px(ctx,8,1,s,'#b45309');px(ctx,7,2,s,'#92400e');px(ctx,9,2,s,'#92400e');px(ctx,2,8,s,'#b45309');px(ctx,1,7,s,'#92400e');px(ctx,1,9,s,'#92400e');px(ctx,14,8,s,'#b45309');px(ctx,15,7,s,'#92400e');px(ctx,15,9,s,'#92400e');px(ctx,8,14,s,'#b45309');px(ctx,7,15,s,'#92400e');px(ctx,9,15,s,'#92400e');px(ctx,4,3,s,'#fde68a');px(ctx,12,3,s,'#fde68a');px(ctx,3,12,s,'#fde68a');px(ctx,13,12,s,'#fde68a');},
+  superbug(ctx,size,frame,dir){const s=size/16,t=frame||0,glow=Math.floor(t/8)%2;for(let a=0;a<Math.PI*2;a+=Math.PI/6){const x=Math.round(8+Math.cos(a)*6.5),y=Math.round(8+Math.sin(a)*6.5);if(x>=0&&x<16&&y>=0&&y<16)px(ctx,x,y,s,glow?'#fbbf24':'#d97706');}px(ctx,5,4,s,'#fbbf24');px(ctx,10,4,s,'#fbbf24');px(ctx,5,11,s,'#fbbf24');px(ctx,10,11,s,'#fbbf24');px(ctx,4,6,s,'#d97706');px(ctx,11,6,s,'#d97706');px(ctx,4,9,s,'#d97706');px(ctx,11,9,s,'#d97706');pxCircle(ctx,8,8,4,s,'#7c1d0c');pxCircle(ctx,8,8,3,s,'#9a3412');pxCircle(ctx,8,8,2,s,'#c2410c');px(ctx,8,8,s,'#ea580c');px(ctx,7,7,s,'#fed7aa');px(ctx,7,4,s,'#fef9c3');px(ctx,8,4,s,'#fef9c3');px(ctx,9,4,s,'#fef9c3');px(ctx,6,5,s,'#fbbf24');px(ctx,10,5,s,'#fbbf24');px(ctx,7,7,s,'#fef3c7');px(ctx,8,7,s,'#fef3c7');px(ctx,7,8,s,'#fef3c7');px(ctx,9,8,s,'#fef3c7');},
+  parasite(ctx,size,frame,dir){const s=size/16,t=frame||0,vph=Math.floor(t/12)%2;pxOval(ctx,8,9,5,5,s,'#1a2e00');pxOval(ctx,8,9,4,4,s,'#365314');pxOval(ctx,8,9,3,4,s,'#4d7c0f');pxOval(ctx,8,9,3,3,s,'#65a30d');pxOval(ctx,8,9,2,2,s,'#84cc16');px(ctx,8,9,s,'#bef264');pxRect(ctx,6,9,4,3,s,'#1a2e00');px(ctx,7,10,s,'#365314');px(ctx,8,10,s,'#4d7c0f');px(ctx,8,3,s,'#1a2e00');px(ctx,7,4,s,'#1a2e00');px(ctx,9,4,s,'#1a2e00');px(ctx,8,4,s,'#1a2e00');px(ctx,7,5,s,'#365314');px(ctx,9,5,s,'#365314');px(ctx,8,5,s,'#4d7c0f');px(ctx,7,6,s,'#65a30d');px(ctx,9,6,s,'#65a30d');px(ctx,8,6,s,'#84cc16');px(ctx,vph?10:11,vph?10:9,s,'#bef264');px(ctx,vph?6:5,vph?11:10,s,'#a3e635');px(ctx,5,8,s,'#bef264');px(ctx,11,8,s,'#bef264');},
+  fungus(ctx,size,frame,dir){const s=size/16,t=frame||0,hp=Math.floor(t/10)%2;pxRect(ctx,7,0,2,5,s,'#6b21a8');px(ctx,6,1,s,'#7c3aed');px(ctx,9,2,s,'#7c3aed');px(ctx,7,0,s,'#e9d5ff');px(ctx,8,0,s,'#ddd6fe');pxRect(ctx,11,10,4,2,s,'#6b21a8');px(ctx,14,9,s,'#7c3aed');px(ctx,15,11,s,'#7c3aed');px(ctx,15,10,s,'#e9d5ff');pxRect(ctx,2,8,5,2,s,'#6b21a8');px(ctx,2,7,s,'#7c3aed');px(ctx,1,10,s,'#7c3aed');px(ctx,1,8,s,'#e9d5ff');px(ctx,1,9,s,'#ddd6fe');pxCircle(ctx,8,8,4,s,'#3b0764');pxCircle(ctx,8,8,3,s,'#6d28d9');pxCircle(ctx,8,8,2,s,'#7c3aed');pxCircle(ctx,8,8,1,s,'#a855f7');px(ctx,8,8,s,'#c084fc');px(ctx,7,7,s,'#e9d5ff');pxCircle(ctx,8,9,1,s,'#4c1d95');pxCircle(ctx,10,6,1,s,'#7c3aed');px(ctx,10,6,s,'#a855f7');px(ctx,hp?4:3,hp?4:5,s,'#d8b4fe');px(ctx,hp?13:12,hp?5:4,s,'#d8b4fe');px(ctx,hp?5:6,hp?13:14,s,'#c084fc');},
+};
+
+// ═══════════════════════════════════════════════════════
+//  RENDERING
+// ═══════════════════════════════════════════════════════
+const FRAME_SIZE = 96;
+const DIRS = ['down','left','right','up'];
+const WALK_T = [0, 5, 10, 15];
+const ENEMY_T = [0, 8, 16, 24];
+
+// Outline colors per character
+const outlineColors = {
+  stem_cell:'#2e1065', neutrophil:'#172554', macrophage:'#2e1065',
+  nk_cell:'#450a0a', b_cell:'#083344', t_cell:'#052e16',
+  dendritic:'#422006', eosinophil:'#431407',
+  bacteria:'#450a0a', bacteria2:'#450a0a', virus:'#431407',
+  virus2:'#422006', superbug:'#422006', parasite:'#052e16', fungus:'#2e1065',
+};
+
+const sheets = {};
+
+function renderSheet(id, drawFn, isEnemy) {
+  const cols = 4;
+  const rows = isEnemy ? 1 : 4;
+  const frameTs = isEnemy ? ENEMY_T : WALK_T;
+  const dirs = isEnemy ? ['down'] : DIRS;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = cols * FRAME_SIZE;
+  canvas.height = rows * FRAME_SIZE;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // Draw single frame to temp canvas
+      const tmp = document.createElement('canvas');
+      tmp.width = FRAME_SIZE; tmp.height = FRAME_SIZE;
+      const tctx = tmp.getContext('2d');
+      tctx.imageSmoothingEnabled = false;
+      drawFn(tctx, FRAME_SIZE, frameTs[c], dirs[r]);
+
+      // Apply auto-outline
+      const outlined = autoOutline(tmp, outlineColors[id] || '#111');
+
+      // Composite onto sheet
+      ctx.drawImage(outlined, c * FRAME_SIZE, r * FRAME_SIZE);
+    }
+  }
+  sheets[id] = canvas;
+  return canvas;
+}
+
+function addCard(container, id, canvas) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const display = document.createElement('canvas');
+  const scale = 0.5;
+  display.width = canvas.width * scale;
+  display.height = canvas.height * scale;
+  display.style.width = display.width + 'px';
+  display.style.height = display.height + 'px';
+  const dctx = display.getContext('2d');
+  dctx.imageSmoothingEnabled = false;
+  dctx.drawImage(canvas, 0, 0, display.width, display.height);
+  card.appendChild(display);
+  card.innerHTML += '<div class="name">' + id + '</div><div class="dims">' + canvas.width + 'x' + canvas.height + '</div>';
+  container.appendChild(card);
+}
+
+// Build all
+const pRow = document.getElementById('player-row');
+const eRow = document.getElementById('enemy-row');
+
+Object.keys(chars).forEach(id => addCard(pRow, id, renderSheet(id, chars[id], false)));
+Object.keys(enemyChars).forEach(id => addCard(eRow, id, renderSheet(id, enemyChars[id], true)));
+
+document.getElementById('status').textContent = 'Rendered ' + Object.keys(sheets).length + ' sheets with auto-outline.';
+
+// ═══ DOWNLOADS ═══
+function downloadAll() {
+  let delay = 0;
+  Object.keys(sheets).forEach(id => {
+    setTimeout(() => {
+      const a = document.createElement('a');
+      a.download = id + '.png';
+      a.href = sheets[id].toDataURL('image/png');
+      a.click();
+    }, delay);
+    delay += 250;
+  });
+  document.getElementById('status').textContent = 'Downloading...';
+}
+
+function downloadManifest() {
+  const m = {};
+  Object.keys(chars).forEach(id => {
+    m[id] = { file:'sprites/'+id+'.png', cols:4, rows:4, artScale:1.0, anims:{walk:0,idle:0} };
+  });
+  Object.keys(enemyChars).forEach(id => {
+    m[id] = { file:'sprites/'+id+'.png', cols:4, rows:1, artScale:1.0, anims:{walk:0,idle:0} };
+  });
+  const a = document.createElement('a');
+  a.download = 'sprite-manifest.json';
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(m,null,2)], {type:'application/json'}));
+  a.click();
+}
+</script>
+</body></html>

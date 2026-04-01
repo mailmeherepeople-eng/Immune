@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>BioCell Sprite Sheet Generator</title>
+<style>
+  body { background: #111; color: #eee; font-family: monospace; padding: 20px; }
+  h2 { color: #a78bfa; margin-top: 30px; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; margin: 10px 0; }
+  .sprite-card { background: #1a1a2e; border: 1px solid #333; padding: 8px; border-radius: 6px; text-align: center; }
+  .sprite-card canvas { display: block; image-rendering: pixelated; border: 1px solid #222; margin-bottom: 6px; }
+  .sprite-card .label { font-size: 11px; color: #888; }
+  button { background: #7c3aed; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-size: 14px; cursor: pointer; margin: 10px 4px; }
+  button:hover { background: #6d28d9; }
+  #status { color: #5eead4; margin: 10px 0; }
+</style>
+</head><body>
+<h1>BioCell Sprite Sheet Generator</h1>
+<p>Renders all SpriteLib sprites to PNG sprite sheets. Click "Download All" to save them to disk.</p>
+<button onclick="downloadAll()">Download All PNGs</button>
+<button onclick="downloadManifest()">Download sprite-manifest.json</button>
+<div id="status"></div>
+
+<h2>Player Morphs (4 dirs x 4 frames = 16 frames each)</h2>
+<div class="row" id="player-row"></div>
+
+<h2>Enemies (4 animation frames each)</h2>
+<div class="row" id="enemy-row"></div>
+
+<script>
+// ═══ PIXEL HELPERS (copied from game) ═══
+function px(ctx, gx, gy, s, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(gx * s, gy * s, s, s);
+}
+function pxRect(ctx, gx, gy, gw, gh, s, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(gx * s, gy * s, gw * s, gh * s);
+}
+function pxCircle(ctx, cx, cy, r, s, color) {
+  ctx.fillStyle = color;
+  for (let y = cy - r; y <= cy + r; y++) {
+    for (let x = cx - r; x <= cx + r; x++) {
+      if ((x - cx) * (x - cx) + (y - cy) * (y - cy) <= r * r) {
+        ctx.fillRect(x * s, y * s, s, s);
+      }
+    }
+  }
+}
+function pxOval(ctx, cx, cy, rx, ry, s, color) {
+  ctx.fillStyle = color;
+  for (let y = cy - ry; y <= cy + ry; y++) {
+    for (let x = cx - rx; x <= cx + rx; x++) {
+      const dx = (x - cx) / rx;
+      const dy = (y - cy) / ry;
+      if (dx * dx + dy * dy <= 1) {
+        ctx.fillRect(x * s, y * s, s, s);
+      }
+    }
+  }
+}
+
+// ═══ SPRITELIB (copied from game — all helpers + all sprites) ═══
+const SpriteLib = {
+  _wf(t) { return Math.floor((t || 0) / 5) % 4; },
+
+  _body(ctx, s, wf, dir, c) {
+    if (dir === 'left') { ctx.save(); ctx.translate(s * 16, 0); ctx.scale(-1, 1); }
+    const bob = (wf === 2) ? 1 : 0;
+    if (dir === 'down' || dir === 'up') {
+      pxRect(ctx, 4, 7+bob, 8, 4, s, c.body);
+      pxRect(ctx, 5, 8+bob, 6, 3, s, c.shade);
+      pxRect(ctx, 4, 11+bob, 8, 1, s, c.legDark);
+      if (wf === 1) {
+        pxRect(ctx, 2, 7+bob, 2, 3, s, c.shade); pxRect(ctx, 12, 6+bob, 2, 5, s, c.body);
+        px(ctx, 2, 10+bob, s, c.shade); px(ctx, 13, 11+bob, s, c.body);
+      } else if (wf === 3) {
+        pxRect(ctx, 2, 6+bob, 2, 5, s, c.body); pxRect(ctx, 12, 7+bob, 2, 3, s, c.shade);
+        px(ctx, 2, 11+bob, s, c.body); px(ctx, 13, 10+bob, s, c.shade);
+      } else {
+        pxRect(ctx, 2, 7+bob, 2, 4, s, c.body); pxRect(ctx, 12, 7+bob, 2, 4, s, c.body);
+        px(ctx, 2, 11+bob, s, c.outline); px(ctx, 13, 11+bob, s, c.outline);
+      }
+      if (wf === 1) {
+        pxRect(ctx, 4, 12, 3, 3, s, c.shade); pxRect(ctx, 3, 15, 4, 1, s, c.leg);
+        pxRect(ctx, 9, 12, 3, 3, s, c.leg); pxRect(ctx, 9, 15, 4, 1, s, c.legDark);
+      } else if (wf === 3) {
+        pxRect(ctx, 4, 12, 3, 3, s, c.leg); pxRect(ctx, 4, 15, 4, 1, s, c.legDark);
+        pxRect(ctx, 9, 12, 3, 3, s, c.shade); pxRect(ctx, 9, 15, 4, 1, s, c.leg);
+      } else {
+        pxRect(ctx, 4, 12, 3, 4, s, c.leg); pxRect(ctx, 9, 12, 3, 4, s, c.leg);
+      }
+    } else {
+      pxRect(ctx, 6, 7+bob, 4, 4, s, c.body); pxRect(ctx, 7, 8+bob, 2, 3, s, c.shade);
+      pxRect(ctx, 6, 11+bob, 4, 1, s, c.legDark);
+      if (wf === 1 || wf === 3) {
+        pxRect(ctx, 10, 6+bob, 2, 4, s, wf===1 ? c.body : c.shade);
+        px(ctx, 5, 8+bob, s, wf===1 ? c.shade : c.body);
+        px(ctx, 5, 9+bob, s, wf===1 ? c.shade : c.body);
+      } else {
+        pxRect(ctx, 10, 7+bob, 2, 3, s, c.body);
+        px(ctx, 5, 8+bob, s, c.shade); px(ctx, 5, 9+bob, s, c.shade);
+      }
+      if (wf === 1) {
+        pxRect(ctx, 7, 12, 2, 3, s, c.leg); pxRect(ctx, 7, 15, 3, 1, s, c.legDark);
+        px(ctx, 6, 13, s, c.shade); px(ctx, 6, 14, s, c.shade);
+      } else if (wf === 3) {
+        pxRect(ctx, 7, 12, 2, 3, s, c.shade);
+        px(ctx, 6, 11, s, c.leg); px(ctx, 6, 12, s, c.leg);
+        px(ctx, 6, 13, s, c.leg); pxRect(ctx, 5, 14, 3, 1, s, c.leg);
+      } else {
+        pxRect(ctx, 7, 12, 2, 4, s, c.leg);
+        px(ctx, 6, 13, s, c.shade); px(ctx, 6, 14, s, c.shade);
+      }
+    }
+    if (dir === 'left') ctx.restore();
+  },
+
+  _headRound(ctx, s, bob, dir, c) {
+    if (dir === 'left') { ctx.save(); ctx.translate(s * 16, 0); ctx.scale(-1, 1); }
+    if (dir === 'down') {
+      pxRect(ctx, 4, 1+bob, 8, 6, s, c.head); px(ctx, 3, 3+bob, s, c.head); px(ctx, 12, 3+bob, s, c.head);
+      px(ctx, 3, 4+bob, s, c.head); px(ctx, 12, 4+bob, s, c.head);
+      px(ctx, 4, 7+bob, s, c.outline); px(ctx, 11, 7+bob, s, c.outline);
+      pxRect(ctx, 5, 3+bob, 2, 2, s, c.eyes); pxRect(ctx, 9, 3+bob, 2, 2, s, c.eyes);
+      px(ctx, 6, 6+bob, s, c.outline); px(ctx, 9, 6+bob, s, c.outline);
+      px(ctx, 7, 6+bob, s, c.outline); px(ctx, 8, 6+bob, s, c.outline);
+      pxRect(ctx, 7, 7+bob, 2, 1, s, c.head);
+    } else if (dir === 'up') {
+      pxRect(ctx, 4, 1+bob, 8, 6, s, c.head); px(ctx, 3, 3+bob, s, c.head); px(ctx, 12, 3+bob, s, c.head);
+      pxRect(ctx, 4, 1+bob, 8, 3, s, c.hair); px(ctx, 3, 3+bob, s, c.hair); px(ctx, 12, 3+bob, s, c.hair);
+      px(ctx, 4, 7+bob, s, c.outline); px(ctx, 11, 7+bob, s, c.outline);
+      pxRect(ctx, 7, 7+bob, 2, 1, s, c.head);
+    } else {
+      pxRect(ctx, 7, 1+bob, 5, 5, s, c.head);
+      px(ctx, 6, 2+bob, s, c.head); px(ctx, 6, 3+bob, s, c.head); px(ctx, 6, 4+bob, s, c.head);
+      px(ctx, 12, 2+bob, s, c.outline); px(ctx, 12, 5+bob, s, c.outline);
+      px(ctx, 13, 3+bob, s, c.head); px(ctx, 13, 4+bob, s, c.head);
+      px(ctx, 10, 3+bob, s, '#fff'); px(ctx, 11, 3+bob, s, c.eyes);
+      px(ctx, 10, 2+bob, s, c.outline); px(ctx, 11, 2+bob, s, c.outline);
+      px(ctx, 12, 5+bob, s, c.outline);
+      pxRect(ctx, 4, 1+bob, 4, 4, s, c.hair);
+      px(ctx, 3, 2+bob, s, c.hair); px(ctx, 3, 3+bob, s, c.hair);
+      pxRect(ctx, 8, 6+bob, 2, 1, s, c.head);
+    }
+    if (dir === 'left') ctx.restore();
+  },
+
+  // ═══ PLAYER MORPHS ═══
+  stem_cell(ctx, size, frame, direction) {
+    const s = size / 16; const wf = SpriteLib._wf(frame); const bob = (wf===2)?1:0;
+    const c = { body:'#7c3aed',shade:'#6d28d9',leg:'#5b21b6',legDark:'#4c1d95',head:'#a78bfa',hair:'#c4b5fd',eyes:'#1a1a2e',outline:'#4c1d95' };
+    SpriteLib._body(ctx, s, wf, direction, c); SpriteLib._headRound(ctx, s, bob, direction, c);
+    if (direction === 'down' || direction === 'up') {
+      px(ctx,6,0,s,'#c4b5fd'); px(ctx,7,0,s,'#e9d5ff'); px(ctx,8,0,s,'#e9d5ff'); px(ctx,9,0,s,'#c4b5fd');
+      px(ctx,5,1,s,'#a78bfa'); px(ctx,10,1,s,'#a78bfa');
+    }
+    const sparks = ['#f0abfc','#67e8f9','#fde68a'];
+    for (let i = 0; i < 3; i++) {
+      const angle = (frame||0)*0.07 + (Math.PI*2/3)*i;
+      const ox = Math.round(8+Math.cos(angle)*5); const oy = Math.round(9+Math.sin(angle)*4);
+      if (ox>=0&&ox<16&&oy>=0&&oy<16) px(ctx,ox,oy,s,sparks[i]);
+    }
+  },
+  neutrophil(ctx, size, frame, direction) {
+    const s = size / 16; const wf = SpriteLib._wf(frame); const bob = (wf===2)?1:0;
+    const c = { body:'#1d4ed8',shade:'#1e40af',leg:'#1e3a8a',legDark:'#172554',head:'#3b82f6',hair:'#93c5fd',eyes:'#0f172a',outline:'#1e3a8a' };
+    SpriteLib._body(ctx, s, wf, direction, c); SpriteLib._headRound(ctx, s, bob, direction, c);
+    if (direction === 'down') {
+      px(ctx,4,2+bob,s,'#93c5fd'); px(ctx,5,1+bob,s,'#bfdbfe'); px(ctx,6,1+bob,s,'#bfdbfe');
+      px(ctx,7,0+bob,s,'#dbeafe'); px(ctx,8,0+bob,s,'#dbeafe');
+      px(ctx,9,1+bob,s,'#bfdbfe'); px(ctx,10,1+bob,s,'#bfdbfe'); px(ctx,11,2+bob,s,'#93c5fd');
+    }
+    px(ctx,6,8,s,'#60a5fa'); px(ctx,9,9,s,'#93c5fd'); px(ctx,7,10,s,'#60a5fa'); px(ctx,10,8,s,'#3b82f6');
+  },
+  macrophage(ctx, size, frame, direction) {
+    const s = size / 16; const wf = SpriteLib._wf(frame); const bob = (wf===2)?1:0;
+    const c = { body:'#6b21a8',shade:'#581c87',leg:'#4a044e',legDark:'#3b0764',head:'#7c3aed',hair:'#a78bfa',eyes:'#111',outline:'#3b0764' };
+    SpriteLib._body(ctx, s, wf, direction, c);
+    if (direction==='down'||direction==='up') {
+      px(ctx,1,7,s,'#6b21a8'); px(ctx,14,7,s,'#6b21a8'); px(ctx,0,8,s,'#581c87'); px(ctx,15,8,s,'#581c87');
+    }
+    SpriteLib._headRound(ctx, s, bob, direction, c);
+    if (direction==='down') {
+      px(ctx,2,3+bob,s,c.head); px(ctx,2,4+bob,s,c.head); px(ctx,2,5+bob,s,c.head);
+      px(ctx,13,3+bob,s,c.head); px(ctx,13,4+bob,s,c.head); px(ctx,13,5+bob,s,c.head);
+    }
+    px(ctx,5,8,s,'#a855f7'); px(ctx,10,9,s,'#c084fc'); px(ctx,7,9,s,'#a855f7'); px(ctx,8,8,s,'#d8b4fe');
+  },
+  nk_cell(ctx, size, frame, direction) {
+    const s = size / 16; const wf = SpriteLib._wf(frame); const bob = (wf===2)?1:0;
+    const c = { body:'#991b1b',shade:'#7f1d1d',leg:'#7f1d1d',legDark:'#450a0a',head:'#dc2626',hair:'#450a0a',eyes:'#fef2f2',outline:'#450a0a' };
+    SpriteLib._body(ctx, s, wf, direction, c); SpriteLib._headRound(ctx, s, bob, direction, c);
+    if (direction==='down') {
+      px(ctx,5,2+bob,s,'#fca5a5'); px(ctx,4,3+bob,s,'#fca5a5'); px(ctx,7,3+bob,s,'#fca5a5'); px(ctx,5,4+bob,s,'#fca5a5');
+      px(ctx,10,2+bob,s,'#fca5a5'); px(ctx,8,3+bob,s,'#fca5a5'); px(ctx,11,3+bob,s,'#fca5a5'); px(ctx,10,4+bob,s,'#fca5a5');
+    }
+    px(ctx,5,8,s,'#fca5a5'); px(ctx,7,8,s,'#fca5a5'); px(ctx,9,8,s,'#fca5a5'); px(ctx,11,8,s,'#fca5a5');
+  },
+  b_cell(ctx, size, frame, direction) {
+    const s = size / 16; const wf = SpriteLib._wf(frame); const bob = (wf===2)?1:0;
+    const c = { body:'#0891b2',shade:'#0e7490',leg:'#0c4a6e',legDark:'#164e63',head:'#06b6d4',hair:'#a5f3fc',eyes:'#111',outline:'#164e63' };
+    SpriteLib._body(ctx, s, wf, direction, c); SpriteLib._headRound(ctx, s, bob, direction, c);
+    if (direction==='down'||direction==='up') {
+      px(ctx,8,0,s,'#22d3ee'); px(ctx,6,0,s,'#67e8f9'); px(ctx,10,0,s,'#67e8f9');
+      px(ctx,5,0,s,'#a5f3fc'); px(ctx,11,0,s,'#a5f3fc');
+    }
+    px(ctx,8,8,s,'#67e8f9'); px(ctx,7,9,s,'#22d3ee'); px(ctx,9,9,s,'#22d3ee'); px(ctx,8,10,s,'#67e8f9');
+  },
+  t_cell(ctx, size, frame, direction) {
+    const s = size / 16; const wf = SpriteLib._wf(frame); const bob = (wf===2)?1:0;
+    const c = { body:'#166534',shade:'#14532d',leg:'#14532d',legDark:'#052e16',head:'#16a34a',hair:'#4ade80',eyes:'#111',outline:'#052e16' };
+    SpriteLib._body(ctx, s, wf, direction, c); SpriteLib._headRound(ctx, s, bob, direction, c);
+    if (direction==='down'||direction==='up') {
+      pxRect(ctx,5,8,6,1,s,'#86efac'); pxRect(ctx,7,8,2,3,s,'#bbf7d0');
+    }
+    if (direction==='right') { px(ctx,11,7,s,'#4ade80'); px(ctx,12,6,s,'#86efac'); px(ctx,13,5,s,'#d1fae5'); }
+    px(ctx,2,9,s,'#4ade80'); px(ctx,13,9,s,'#4ade80');
+  },
+  dendritic(ctx, size, frame, direction) {
+    const s = size / 16; const wf = SpriteLib._wf(frame); const bob = (wf===2)?1:0;
+    const c = { body:'#a16207',shade:'#92400e',leg:'#78350f',legDark:'#451a03',head:'#ca8a04',hair:'#fde68a',eyes:'#111',outline:'#78350f' };
+    SpriteLib._body(ctx, s, wf, direction, c); SpriteLib._headRound(ctx, s, bob, direction, c);
+    if (direction==='down'||direction==='up') {
+      px(ctx,4,1,s,'#fcd34d'); px(ctx,3,0,s,'#fde68a'); px(ctx,5,0,s,'#fde68a'); px(ctx,2,0,s,'#fbbf24');
+      px(ctx,11,1,s,'#fcd34d'); px(ctx,10,0,s,'#fde68a'); px(ctx,12,0,s,'#fde68a'); px(ctx,13,0,s,'#fbbf24');
+    }
+    if (direction==='down') {
+      pxRect(ctx,5,3+bob,2,2,s,'#fbbf24'); pxRect(ctx,9,3+bob,2,2,s,'#fbbf24'); pxRect(ctx,7,3+bob,2,1,s,'#fde68a');
+    }
+    px(ctx,6,8,s,'#fcd34d'); px(ctx,9,9,s,'#fcd34d'); px(ctx,8,8,s,'#fde68a');
+  },
+  eosinophil(ctx, size, frame, direction) {
+    const s = size / 16; const wf = SpriteLib._wf(frame); const bob = (wf===2)?1:0;
+    const c = { body:'#9a3412',shade:'#7c2d12',leg:'#7c2d12',legDark:'#431407',head:'#ea580c',hair:'#fdba74',eyes:'#111',outline:'#431407' };
+    SpriteLib._body(ctx, s, wf, direction, c);
+    if (direction==='down') {
+      pxRect(ctx,3,2+bob,5,5,s,c.head); pxRect(ctx,8,2+bob,5,5,s,c.head); pxRect(ctx,6,3+bob,4,3,s,c.head);
+      px(ctx,7,2+bob,s,'#431407'); px(ctx,8,2+bob,s,'#431407');
+      pxRect(ctx,4,3+bob,2,2,s,c.eyes); pxRect(ctx,10,3+bob,2,2,s,c.eyes); pxRect(ctx,7,7+bob,2,1,s,c.head);
+    } else if (direction==='up') {
+      pxRect(ctx,3,1+bob,5,5,s,c.head); pxRect(ctx,8,1+bob,5,5,s,c.head); pxRect(ctx,6,2+bob,4,3,s,c.head);
+      px(ctx,7,1+bob,s,'#431407'); px(ctx,8,1+bob,s,'#431407'); pxRect(ctx,7,6+bob,2,1,s,c.head);
+    } else { SpriteLib._headRound(ctx, s, bob, direction, c); }
+    if (direction==='right') { pxRect(ctx,3,8,2,3,s,'#fdba74'); px(ctx,3,7,s,'#431407'); px(ctx,4,7,s,'#431407'); }
+    px(ctx,6,9,s,'#fdba74'); px(ctx,9,8,s,'#fed7aa'); px(ctx,7,10,s,'#fdba74');
+  },
+
+  // ═══ ENEMY SPRITES ═══
+  bacteria(ctx, size, frame, dir) {
+    const s = size / 16; const t = frame || 0;
+    const wA = Math.sin(t * 0.28) > 0 ? 0 : 1; const wB = Math.sin(t * 0.28 + 1.6) > 0 ? 0 : -1;
+    px(ctx, 0, 7 + wB, s, '#fca5a5'); px(ctx, 1, 7 + wA, s, '#f87171'); px(ctx, 2, 7, s, '#fca5a5'); px(ctx, 2, 8, s, '#fca5a5');
+    pxRect(ctx, 3, 6, 10, 5, s, '#7f1d1d'); pxRect(ctx, 4, 5, 8, 7, s, '#991b1b');
+    pxRect(ctx, 4, 6, 8, 5, s, '#b91c1c'); pxRect(ctx, 5, 6, 6, 4, s, '#dc2626'); pxRect(ctx, 6, 7, 3, 2, s, '#ef4444');
+    px(ctx, 3, 5, s, '#991b1b'); px(ctx, 3, 9, s, '#991b1b'); px(ctx, 12, 5, s, '#991b1b'); px(ctx, 12, 9, s, '#991b1b');
+    px(ctx, 7, 8, s, '#fee2e2'); px(ctx, 9, 7, s, '#fecaca'); px(ctx, 8, 9, s, '#fecaca'); px(ctx, 6, 8, s, '#fee2e2');
+    px(ctx, 5, 7, s, '#fca5a5'); px(ctx, 10, 8, s, '#fca5a5'); px(ctx, 11, 7, s, '#f87171');
+    px(ctx, 6, 4, s, '#f87171'); px(ctx, 9, 4, s, '#f87171'); px(ctx, 7, 11, s, '#f87171'); px(ctx, 10, 11, s, '#f87171');
+  },
+  bacteria2(ctx, size, frame, dir) {
+    const s = size / 16; const t = frame || 0; const pulse = Math.floor(t / 10) % 2;
+    if (pulse) {
+      px(ctx, 8, 2, s, '#fca5a5'); px(ctx, 2, 8, s, '#fca5a5'); px(ctx, 13, 8, s, '#fca5a5'); px(ctx, 8, 13, s, '#fca5a5');
+      px(ctx, 4, 3, s, '#fecaca'); px(ctx, 12, 3, s, '#fecaca'); px(ctx, 3, 11, s, '#fecaca'); px(ctx, 12, 11, s, '#fecaca');
+    }
+    pxCircle(ctx, 8, 8, 6, s, '#7f1d1d'); pxCircle(ctx, 8, 8, 5, s, '#991b1b');
+    pxCircle(ctx, 8, 8, 4, s, '#b91c1c'); pxCircle(ctx, 8, 8, 3, s, '#dc2626'); pxCircle(ctx, 8, 8, 2, s, '#ef4444');
+    px(ctx, 7, 6, s, '#fca5a5'); px(ctx, 6, 7, s, '#fecaca');
+    px(ctx, 8, 4, s, '#991b1b'); px(ctx, 8, 12, s, '#991b1b');
+    px(ctx, 5, 5, s, '#f87171'); px(ctx, 11, 5, s, '#f87171'); px(ctx, 5, 11, s, '#f87171'); px(ctx, 11, 11, s, '#f87171');
+  },
+  virus(ctx, size, frame, dir) {
+    const s = size / 16; const t = frame || 0; const alt = Math.floor(t / 8) % 2;
+    pxCircle(ctx, 8, 8, 4, s, '#9a3412'); pxCircle(ctx, 8, 8, 3, s, '#c2410c');
+    pxCircle(ctx, 8, 8, 2, s, '#ea580c'); px(ctx, 8, 8, s, '#fb923c');
+    px(ctx, 7, 7, s, '#fed7aa'); px(ctx, 8, 7, s, '#fdba74'); px(ctx, 9, 9, s, '#fdba74'); px(ctx, 7, 9, s, '#fdba74');
+    const sA = [[8,3],[8,13],[3,8],[13,8],[5,4],[11,4],[5,12],[11,12]];
+    const sB = [[8,3],[8,13],[3,8],[13,8],[4,5],[12,5],[4,11],[12,11]];
+    (alt===0?sA:sB).forEach(([x,y]) => px(ctx, x, y, s, '#c2410c'));
+    const tA = [[8,2],[8,14],[2,8],[14,8],[4,3],[12,3],[4,13],[12,13]];
+    const tB = [[8,2],[8,14],[2,8],[14,8],[3,4],[13,4],[3,12],[13,12]];
+    (alt===0?tA:tB).forEach(([x,y]) => px(ctx, x, y, s, '#fed7aa'));
+  },
+  virus2(ctx, size, frame, dir) {
+    const s = size / 16; const t = frame || 0; const ph = Math.floor(t / 6) % 4;
+    pxOval(ctx, 8, 8, 5, 6, s, '#78350f'); pxOval(ctx, 8, 8, 4, 5, s, '#92400e'); pxOval(ctx, 8, 8, 3, 4, s, '#b45309');
+    pxOval(ctx, 8, 8, 2, 3, s, '#d97706'); px(ctx, 8, 8, s, '#f59e0b');
+    const segs = [[7,7],[9,7],[8,6],[7,9],[9,9],[8,10],[6,8],[10,8]];
+    const ac = ['#fed7aa','#fdba74','#fcd34d','#fde68a'];
+    segs.forEach(([x,y], i) => px(ctx, x, y, s, ac[(i + ph) % 4]));
+    px(ctx, 8, 1, s, '#b45309'); px(ctx, 7, 2, s, '#92400e'); px(ctx, 9, 2, s, '#92400e');
+    px(ctx, 2, 8, s, '#b45309'); px(ctx, 1, 7, s, '#92400e'); px(ctx, 1, 9, s, '#92400e');
+    px(ctx, 14, 8, s, '#b45309'); px(ctx, 15, 7, s, '#92400e'); px(ctx, 15, 9, s, '#92400e');
+    px(ctx, 8, 14, s, '#b45309'); px(ctx, 7, 15, s, '#92400e'); px(ctx, 9, 15, s, '#92400e');
+    px(ctx, 4, 3, s, '#fde68a'); px(ctx, 12, 3, s, '#fde68a'); px(ctx, 3, 12, s, '#fde68a'); px(ctx, 13, 12, s, '#fde68a');
+  },
+  superbug(ctx, size, frame, dir) {
+    const s = size / 16; const t = frame || 0; const glow = Math.floor(t / 8) % 2;
+    for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+      const x = Math.round(8 + Math.cos(a) * 6.5); const y = Math.round(8 + Math.sin(a) * 6.5);
+      if (x >= 0 && x < 16 && y >= 0 && y < 16) px(ctx, x, y, s, glow ? '#fbbf24' : '#d97706');
+    }
+    px(ctx, 5, 4, s, '#fbbf24'); px(ctx, 10, 4, s, '#fbbf24'); px(ctx, 5, 11, s, '#fbbf24'); px(ctx, 10, 11, s, '#fbbf24');
+    px(ctx, 4, 6, s, '#d97706'); px(ctx, 11, 6, s, '#d97706'); px(ctx, 4, 9, s, '#d97706'); px(ctx, 11, 9, s, '#d97706');
+    pxCircle(ctx, 8, 8, 4, s, '#7c1d0c'); pxCircle(ctx, 8, 8, 3, s, '#9a3412');
+    pxCircle(ctx, 8, 8, 2, s, '#c2410c'); px(ctx, 8, 8, s, '#ea580c'); px(ctx, 7, 7, s, '#fed7aa');
+    px(ctx, 7, 4, s, '#fef9c3'); px(ctx, 8, 4, s, '#fef9c3'); px(ctx, 9, 4, s, '#fef9c3');
+    px(ctx, 6, 5, s, '#fbbf24'); px(ctx, 10, 5, s, '#fbbf24');
+    px(ctx, 7, 7, s, '#fef3c7'); px(ctx, 8, 7, s, '#fef3c7'); px(ctx, 7, 8, s, '#fef3c7'); px(ctx, 9, 8, s, '#fef3c7');
+  },
+  parasite(ctx, size, frame, dir) {
+    const s = size / 16; const t = frame || 0; const vph = Math.floor(t / 12) % 2;
+    pxOval(ctx, 8, 9, 5, 5, s, '#1a2e00'); pxOval(ctx, 8, 9, 4, 4, s, '#365314');
+    pxOval(ctx, 8, 9, 3, 4, s, '#4d7c0f'); pxOval(ctx, 8, 9, 3, 3, s, '#65a30d');
+    pxOval(ctx, 8, 9, 2, 2, s, '#84cc16'); px(ctx, 8, 9, s, '#bef264');
+    pxRect(ctx, 6, 9, 4, 3, s, '#1a2e00'); px(ctx, 7, 10, s, '#365314'); px(ctx, 8, 10, s, '#4d7c0f');
+    px(ctx, 8, 3, s, '#1a2e00'); px(ctx, 7, 4, s, '#1a2e00'); px(ctx, 9, 4, s, '#1a2e00'); px(ctx, 8, 4, s, '#1a2e00');
+    px(ctx, 7, 5, s, '#365314'); px(ctx, 9, 5, s, '#365314'); px(ctx, 8, 5, s, '#4d7c0f');
+    px(ctx, 7, 6, s, '#65a30d'); px(ctx, 9, 6, s, '#65a30d'); px(ctx, 8, 6, s, '#84cc16');
+    px(ctx, vph ? 10 : 11, vph ? 10 : 9, s, '#bef264'); px(ctx, vph ? 6 : 5, vph ? 11 : 10, s, '#a3e635');
+    px(ctx, 5, 8, s, '#bef264'); px(ctx, 11, 8, s, '#bef264');
+  },
+  fungus(ctx, size, frame, dir) {
+    const s = size / 16; const t = frame || 0; const hp = Math.floor(t / 10) % 2;
+    pxRect(ctx, 7, 0, 2, 5, s, '#6b21a8'); px(ctx, 6, 1, s, '#7c3aed'); px(ctx, 9, 2, s, '#7c3aed');
+    px(ctx, 7, 0, s, '#e9d5ff'); px(ctx, 8, 0, s, '#ddd6fe');
+    pxRect(ctx, 11, 10, 4, 2, s, '#6b21a8'); px(ctx, 14, 9, s, '#7c3aed'); px(ctx, 15, 11, s, '#7c3aed'); px(ctx, 15, 10, s, '#e9d5ff');
+    pxRect(ctx, 2, 8, 5, 2, s, '#6b21a8'); px(ctx, 2, 7, s, '#7c3aed'); px(ctx, 1, 10, s, '#7c3aed');
+    px(ctx, 1, 8, s, '#e9d5ff'); px(ctx, 1, 9, s, '#ddd6fe');
+    pxCircle(ctx, 8, 8, 4, s, '#3b0764'); pxCircle(ctx, 8, 8, 3, s, '#6d28d9');
+    pxCircle(ctx, 8, 8, 2, s, '#7c3aed'); pxCircle(ctx, 8, 8, 1, s, '#a855f7');
+    px(ctx, 8, 8, s, '#c084fc'); px(ctx, 7, 7, s, '#e9d5ff');
+    pxCircle(ctx, 8, 9, 1, s, '#4c1d95'); pxCircle(ctx, 10, 6, 1, s, '#7c3aed'); px(ctx, 10, 6, s, '#a855f7');
+    px(ctx, hp ? 4 : 3, hp ? 4 : 5, s, '#d8b4fe'); px(ctx, hp ? 13 : 12, hp ? 5 : 4, s, '#d8b4fe');
+    px(ctx, hp ? 5 : 6, hp ? 13 : 14, s, '#c084fc');
+  },
+};
+
+// ═══ GENERATOR LOGIC ═══
+const FRAME_SIZE = 96; // pixels per frame
+const DIRS = ['down', 'left', 'right', 'up'];
+const WALK_FRAMES = [0, 5, 10, 15]; // t values for _wf() frames 0,1,2,3
+const ENEMY_FRAMES = [0, 8, 16, 24]; // spread for enemy animation variety
+
+const playerMorphs = ['stem_cell', 'neutrophil', 'macrophage', 'nk_cell', 'b_cell', 't_cell', 'dendritic', 'eosinophil'];
+const enemies = ['bacteria', 'bacteria2', 'virus', 'virus2', 'superbug', 'parasite', 'fungus'];
+
+const sheets = {}; // { id: canvas }
+
+function renderPlayerSheet(id) {
+  const cols = WALK_FRAMES.length; // 4
+  const rows = DIRS.length; // 4
+  const canvas = document.createElement('canvas');
+  canvas.width = cols * FRAME_SIZE;
+  canvas.height = rows * FRAME_SIZE;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      ctx.save();
+      ctx.translate(c * FRAME_SIZE, r * FRAME_SIZE);
+      SpriteLib[id](ctx, FRAME_SIZE, WALK_FRAMES[c], DIRS[r]);
+      ctx.restore();
+    }
+  }
+  sheets[id] = canvas;
+  return canvas;
+}
+
+function renderEnemySheet(id) {
+  const cols = ENEMY_FRAMES.length;
+  const canvas = document.createElement('canvas');
+  canvas.width = cols * FRAME_SIZE;
+  canvas.height = FRAME_SIZE;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  for (let c = 0; c < cols; c++) {
+    ctx.save();
+    ctx.translate(c * FRAME_SIZE, 0);
+    SpriteLib[id](ctx, FRAME_SIZE, ENEMY_FRAMES[c], 'down');
+    ctx.restore();
+  }
+  sheets[id] = canvas;
+  return canvas;
+}
+
+function addCard(container, id, canvas) {
+  const card = document.createElement('div');
+  card.className = 'sprite-card';
+  // Show at half-size for display
+  const display = document.createElement('canvas');
+  display.width = canvas.width / 2;
+  display.height = canvas.height / 2;
+  display.style.width = display.width + 'px';
+  display.style.height = display.height + 'px';
+  const dctx = display.getContext('2d');
+  dctx.imageSmoothingEnabled = false;
+  dctx.drawImage(canvas, 0, 0, display.width, display.height);
+  card.appendChild(display);
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = id + ' (' + canvas.width + 'x' + canvas.height + ')';
+  card.appendChild(label);
+  container.appendChild(card);
+}
+
+// Render all
+const playerRow = document.getElementById('player-row');
+const enemyRow = document.getElementById('enemy-row');
+
+playerMorphs.forEach(id => {
+  const canvas = renderPlayerSheet(id);
+  addCard(playerRow, id, canvas);
+});
+
+enemies.forEach(id => {
+  const canvas = renderEnemySheet(id);
+  addCard(enemyRow, id, canvas);
+});
+
+document.getElementById('status').textContent = 'Rendered ' + (playerMorphs.length + enemies.length) + ' sprite sheets.';
+
+// ═══ DOWNLOAD ═══
+function downloadCanvas(canvas, filename) {
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function downloadAll() {
+  let delay = 0;
+  Object.keys(sheets).forEach(id => {
+    setTimeout(() => downloadCanvas(sheets[id], id + '.png'), delay);
+    delay += 200; // stagger to avoid browser blocking
+  });
+  document.getElementById('status').textContent = 'Downloading ' + Object.keys(sheets).length + ' PNGs...';
+}
+
+function downloadManifest() {
+  const manifest = {};
+  playerMorphs.forEach(id => {
+    manifest[id] = {
+      file: 'sprites/' + id + '.png',
+      cols: WALK_FRAMES.length,
+      rows: DIRS.length,
+      artScale: 1.0,
+      anims: { walk: 0, idle: 0 }
+    };
+  });
+  enemies.forEach(id => {
+    manifest[id] = {
+      file: 'sprites/' + id + '.png',
+      cols: ENEMY_FRAMES.length,
+      rows: 1,
+      artScale: 1.0,
+      anims: { walk: 0, idle: 0 }
+    };
+  });
+  const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.download = 'sprite-manifest.json';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  document.getElementById('status').textContent = 'Downloaded sprite-manifest.json';
+}
+</script>
+</body></html>
