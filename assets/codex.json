@@ -1,109 +1,145 @@
 {
-  "enemies": [
-    {
+  "version": "1.0",
+  "entries": {
+    "bacteria": {
       "id": "bacteria",
-      "name": "E. COLI",
-      "fullName": "Escherichia coli",
-      "type": "Gram-Negative Bacterium",
-      "threat": "LOW",
+      "gameEnemyId": "bacteria",
+      "name": "E. Coli",
+      "scientificName": "Escherichia coli",
+      "classification": "Gram-Negative Bacterium",
+      "tier": "E",
+      "tierLabel": "OPPORTUNIST",
+      "tierDescription": "Harmless in the right place. Dangerous only because it got lost.",
       "color": "#ef4444",
-      "lines": [
-        "Gram-negative rod. Loves the gut, hates the bloodstream. When it escapes the intestine, your complement system tears holes in its outer membrane before you even arrive — no skill required.",
-        "Your Phagocytose works via opsonization: complement fragments coat the bacterium like a target marker, and you engulf the whole package. It never sees you coming. The flagellum that propels it is also what your pattern recognition receptors (PRRs) flag first.",
-        "Fires straight because it has one trick: motility. Predictable. A simple organism that only becomes dangerous in huge numbers — or in a body that can't fight back."
-      ],
-      "counteredBy": ["neutrophil", "macrophage"],
-      "attackNote": "Straight-line projectiles. Predictable trajectory — one row move and you are safe the entire attack."
+      "complementVulnerable": true,
+      "recommendedMorph": "macrophage",
+      "indicatorColor": "#ef4444",
+      "variantIds": ["ecoli_o157", "ecoli_biofilm", "ecoli_esbl"],
+      "tabs": {
+        "fieldReport": "You have met this one before. You just did not know it. Right now, in the gut, hundreds of billions of E. coli are living peacefully, making vitamin K, asking for nothing. Those ones are fine. Those ones are friends.\n\nThis one took a wrong turn somewhere near the intestinal wall and ended up in the bloodstream, where it has absolutely no business being. It knows it. It is panicking. That makes it predictable.\n\nThe lipopolysaccharide shell is its only real armor, and your complement system has been punching holes in it since before you arrived. By the time you see it, it is already dying. Your job is just to finish the sentence.",
+        "combatNotes": "Phagocytose ends this fast. Do not overthink it.\n\nThe spread attack (TOXIN SPRAY) is a bluff — it fires wide because it is scared, not because it is smart. Stay mobile. This is not the enemy that kills you. This is the enemy that teaches you the controls before the enemy that kills you shows up.\n\nRECOMMENDED: Macrophage. Engulf devours it in two hits.\n\nWATCH FOR: Mutant variants with altered indicator rings. A slightly darker red means something changed.",
+        "funFact": "E. coli can evolve antibiotic resistance and pass that resistance to completely different species of bacteria — not to its children, but to its neighbors, right now, in real time. This is called horizontal gene transfer.\n\nThis is why superbugs exist. The bacteria are not getting stronger through generations. They are sharing notes in real time.\n\nAlso: E. coli was the first organism used to produce synthetic human insulin, in 1982. The organism behind food poisoning produces the medicine that keeps diabetics alive. Biology contains multitudes."
+      }
     },
-    {
+    "bacteria2": {
       "id": "bacteria2",
-      "name": "STAPH",
-      "fullName": "Staphylococcus aureus",
-      "type": "Gram-Positive Bacterium",
-      "threat": "MODERATE",
+      "gameEnemyId": "bacteria2",
+      "name": "Staph",
+      "scientificName": "Staphylococcus aureus",
+      "classification": "Gram-Positive Bacterium",
+      "tier": "D",
+      "tierLabel": "COMMON",
+      "tierDescription": "Annoying. Rarely lethal in a healthy host. Dangerous when the door is left open.",
       "color": "#f87171",
-      "lines": [
-        "Gram-positive. That thick peptidoglycan wall means complement has a harder time — there is no outer membrane to punch holes through. You have to engulf it directly, the old-fashioned way.",
-        "Biofilm is its superpower. It anchors colonies to surfaces and creates a protective matrix that antibiotics cannot penetrate. Inside the body it coats damaged tissue and implants, becoming invisible to surveillance.",
-        "Spreads three attack vectors when cornered. That is not aggression — that is desperation. A panicked Staph colony dumps toxins in every direction hoping something lands."
-      ],
-      "counteredBy": ["neutrophil", "macrophage"],
-      "attackNote": "Three-way spread on special. The center shot is the dangerous one. Strafe before the burst."
+      "complementVulnerable": true,
+      "recommendedMorph": "macrophage",
+      "indicatorColor": "#f87171",
+      "variantIds": ["staph_biofilm", "staph_toxin"],
+      "tabs": {
+        "fieldReport": "One in three people are currently carrying Staphylococcus aureus in their nose. Not sick. Not infected. Just carrying it. It is comfortable there.\n\nStaph is the houseguest who never causes trouble until the day it does — and then it causes catastrophic trouble. It entered through a small cut the host did not think was worth worrying about.\n\nUnlike E. coli, Staph is gram-positive: thicker cell wall, harder to crack. Your complement system slows it down but does not finish it. It can form biofilm when it feels threatened. Do not give it time to settle.",
+        "combatNotes": "Fires faster than E. coli and hits harder. Respect that.\n\nBIOFILM BURST fires from the right side of the grid. Hug the left wall when you see the charge animation — the projectile spread fans rightward.\n\nMacrophage's Engulf is ideal here; the self-heal matters. Do not let it sit in the back column. Some variants develop a damage shield if you are passive. Aggression wins.",
+        "funFact": "Staphylococcus aureus was the bacterium Alexander Fleming noticed killing his cultures in 1928 — the observation that led directly to penicillin.\n\nThe bacterium that taught us antibiotics exist is now one of the leading causes of antibiotic-resistant infections on Earth.\n\nFleming accepted his Nobel Prize in 1945 and explicitly warned that misusing penicillin would cause resistant strains. Nobody listened. MRSA was identified in 1961, one year after methicillin was introduced. He was right within twelve months."
+      }
     },
-    {
+    "virus": {
       "id": "virus",
-      "name": "RHINOVIRUS",
-      "fullName": "Human Rhinovirus (HRV)",
-      "type": "Positive-Sense ssRNA Virus",
-      "threat": "LOW",
+      "gameEnemyId": "virus",
+      "name": "Rhinovirus",
+      "scientificName": "Rhinovirus (HRV)",
+      "classification": "Single-Stranded RNA Virus",
+      "tier": "E",
+      "tierLabel": "OPPORTUNIST",
+      "tierDescription": "Cannot kill you. Does not need to. Its strategy is volume and your underestimation.",
       "color": "#fb923c",
-      "lines": [
-        "The common cold. No cure — not because we cannot try — but because it has over 160 serotypes and mutates its surface proteins constantly. Your B-Cell Memory Tag can barely keep up with one variant before a new face appears.",
-        "It hijacks the ICAM-1 receptor on your nasal epithelial cells. Once inside, it replicates using your cell's own ribosomes, producing thousands of copies in under six hours. The cell bursts. The cycle repeats.",
-        "Five-vector spread mimics antigenic drift in action: each shot is a variant launched from a single burst cell. Fast. Annoying. One billion infections per year on Earth — the most successful pathogen you will ever fight."
-      ],
-      "counteredBy": ["nk_cell", "t_cell"],
-      "attackNote": "Rapid five-shot spread. Center your row and two outer shots miss entirely. The danger is the sheer fire rate."
+      "complementVulnerable": true,
+      "recommendedMorph": "t_cell",
+      "indicatorColor": "#fb923c",
+      "variantIds": ["rhino_serotype", "rhino_cold_adapted"],
+      "tabs": {
+        "fieldReport": "Nobody respects the rhinovirus. That is why it infects a billion people per year.\n\nOver 160 known serotypes, each slightly different enough that antibodies from last winter do not recognize this version. Your memory B-cells are useless here. By the time your adaptive immune system identifies it, the virus has replicated ten million times and moved on.\n\nIt thrives at 33 degrees Celsius — the temperature of the nasal passages. The bloodstream is too warm for it. It is here because it took a wrong turn and it is moving fast.",
+        "combatNotes": "Speed fight. Not a power fight.\n\nVIRAL BURST hits five directions simultaneously. There is no safe column, only a safe moment. The attack has a half-second pause before release. Move one row on that pause.\n\nT-Cell handles this most efficiently. Do NOT use Macrophage — too slow, too much chip damage.",
+        "funFact": "You have heard your whole life that cold weather causes colds. It does not.\n\nCold weather causes people to go inside, share recycled air, and touch the same surfaces. The virus loves this. The cold is innocent. Blame the heating system.\n\nRhinovirus evolved to prefer 33 degrees because that is the temperature inside human noses. In a very specific sense, your nose is its natural habitat and you are an inconvenient obstacle."
+      }
     },
-    {
+    "virus2": {
       "id": "virus2",
-      "name": "INFLUENZA",
-      "fullName": "Influenza A (H1N1)",
-      "type": "Segmented Negative-Sense ssRNA Virus",
-      "threat": "MODERATE",
+      "gameEnemyId": "virus2",
+      "name": "Influenza",
+      "scientificName": "Influenza A virus",
+      "classification": "Segmented RNA Virus",
+      "tier": "D",
+      "tierLabel": "COMMON",
+      "tierDescription": "Seasonal nuisance in good years. Civilization-ending in bad ones.",
       "color": "#fdba74",
-      "lines": [
-        "Eight genome segments that can independently shuffle between strains. One pig cell co-infected by two different flu viruses produces a hybrid that neither immune system recognizes. That is antigenic shift — and it is why the 1918 pandemic killed 50 million people.",
-        "Hemagglutinin binds your respiratory cells. Neuraminidase helps new viral particles escape the dying cell. Both proteins change every season through antigenic drift. This is why you need a new flu shot every year and why last year's immunity is never enough.",
-        "The second attack wave comes faster and hits a different row. That is not programming — that is the neuraminidase cascade: viral particles flooding out of the cell in every direction simultaneously."
-      ],
-      "counteredBy": ["nk_cell", "t_cell", "b_cell"],
-      "attackNote": "Second wave is faster than the first. Keep moving — standing still after dodging wave one is how you die."
+      "complementVulnerable": true,
+      "recommendedMorph": "nk_cell",
+      "indicatorColor": "#fdba74",
+      "variantIds": ["flu_antigenic_shift", "flu_h5n1"],
+      "tabs": {
+        "fieldReport": "Influenza has an eight-segment RNA genome, and those segments can shuffle with bird flu and swine flu segments when multiple strains infect the same cell simultaneously. This is called antigenic shift. This is how pandemic strains are born.\n\nThe 1918 pandemic killed 50 to 100 million people. More than World War One, in a fraction of the time. Every time this virus replicates, it makes errors. Every error is a lottery ticket. Most losing. Some winning. You are the only thing standing between this host and whatever the lottery produces.",
+        "combatNotes": "MUTATION WAVE: five projectiles spreading upward. Orange shimmer is the tell. Move to the bottom row when you see it. Stay there. The spread climbs.\n\nNK Cell's Granzyme bypasses surface protein recognition — true damage hits even variants your memory B-cells cannot identify.\n\nB-Cell Memory Tag works on standard encounters. Does NOT work on antigenic shift variants. That is biologically intentional.",
+        "funFact": "The 1918 flu killed young, healthy adults at higher rates than children or the elderly.\n\nThe hypothesis: strong immune systems mounted a more violent inflammatory response. A cytokine storm. The immune system trying to destroy the virus destroyed the lungs in the process.\n\nIn the worst pandemic in modern history, having a robust immune system made you statistically more likely to die. Sometimes the weapon is also the wound."
+      }
     },
-    {
+    "superbug": {
       "id": "superbug",
+      "gameEnemyId": "superbug",
       "name": "MRSA",
-      "fullName": "Methicillin-Resistant Staphylococcus aureus",
-      "type": "Drug-Resistant Gram-Positive Bacterium",
-      "threat": "CRITICAL",
+      "scientificName": "Methicillin-Resistant Staphylococcus aureus",
+      "classification": "Gram-Positive Bacterium (Antibiotic-Resistant)",
+      "tier": "A",
+      "tierLabel": "CRITICAL",
+      "tierDescription": "Resistant strains. Few treatment options. Kills healthy adults. No shortcuts.",
       "color": "#fbbf24",
-      "lines": [
-        "This one earned its name. MRSA carries the mecA gene — it produces a modified penicillin-binding protein that beta-lactam antibiotics (penicillin, methicillin, amoxicillin, all of them) cannot bind. Every antibiotic humanity developed over 60 years bounces off its surface.",
-        "Complement CANNOT touch it. It expresses Protein A on its surface, which binds immunoglobulins backwards — neutralizing the opsonization that normally marks bacteria for destruction. Your passive defenses are worthless here.",
-        "You are literally the last line of defense. Dendritic Cell antigen presentation followed by T-Cell execution is the only combination that reliably works. There is no drug. There is no shortcut. Just you."
-      ],
-      "counteredBy": ["dendritic", "t_cell"],
-      "attackNote": "Heavy straight shots. Complement does zero damage. Use Antigen Scan to strip DEF, then execute with T-Cell or NK Cell."
+      "complementVulnerable": false,
+      "recommendedMorph": "dendritic",
+      "indicatorColor": "#fbbf24",
+      "variantIds": ["mrsa_ha", "mrsa_vrsa", "mrsa_biofilm"],
+      "tabs": {
+        "fieldReport": "Fourteen antibiotics. That is how many antimicrobial agents have been deployed against Staphylococcus aureus since penicillin in the 1940s. MRSA has outlasted every single one.\n\nNot because it is intelligent. Because bacteria reproduce in twenty minutes and evolution is just statistics. When you expose billions of organisms to a poison and a handful survive by chance, those survivors become the new normal within days.\n\nWe did this. Agricultural antibiotic overuse. Patients not finishing courses. Antibiotics in hand soap. We trained this organism to survive everything we could throw at it. It kills 35,000 people in the United States alone every year. Your complement system cannot touch it. There is no antibiotic behind you.",
+        "combatNotes": "THE CORRECT SEQUENCE:\n1. Dendritic Cell — Antigen Scan. Strips 40% defense. Not optional.\n2. Morph to NK Cell (Granzyme) or T-Cell (Cytotoxic Strike + Apoptosis execute).\n3. Finish before the special fires.\n\nANTIBIOTIC SHIELD SLAM telegraphs for over a second. Slow. Will end you if you are already hurt. Heal before the special window.\n\nExtramedullary Hematopoiesis upgrade pays for itself here.",
+        "funFact": "MRSA evolved partly because we fed antibiotics to healthy livestock to make them grow faster. Billions of animals. Continuous low-level exposure. Decades. A perfect training environment for resistance.\n\nThe strains that emerged in farm animals transferred to humans.\n\nThe post-antibiotic era is not science fiction. The WHO has a projected timeline. MRSA is not the end of that story. It is the beginning."
+      }
     },
-    {
+    "parasite": {
       "id": "parasite",
-      "name": "PLASMODIUM",
-      "fullName": "Plasmodium falciparum",
-      "type": "Apicomplexan Protozoan Parasite",
-      "threat": "HIGH",
+      "gameEnemyId": "parasite",
+      "name": "Plasmodium",
+      "scientificName": "Plasmodium falciparum",
+      "classification": "Apicomplexan Parasite",
+      "tier": "S",
+      "tierLabel": "APEX",
+      "tierDescription": "May have killed more humans than any other organism in history. It shaped your genome.",
       "color": "#a3e635",
-      "lines": [
-        "The malaria parasite. Multiple life stages: sporozoite (injected by mosquito), merozoite (bursts from red blood cells), gametocyte (waits to infect the next mosquito). Each stage has a different surface protein. Each requires a different immune response. It is not one enemy — it is four.",
-        "Merozoite Release is not a metaphor. When a parasitized red blood cell lyses, it releases 16 to 32 new merozoites simultaneously. Each can infect a new cell within seconds. The synchronized timing of this bursting is what causes malaria's characteristic fever spikes.",
-        "Eosinophil triples damage because it evolved specifically for large parasites. The Major Basic Protein (MBP) it dumps at close range punches cytotoxic holes through parasite membranes that antibodies and phagocytosis cannot reach."
-      ],
-      "counteredBy": ["eosinophil"],
-      "attackNote": "Merozoites track your row after launch. Eosinophil triples all damage — always bring it to this fight."
+      "complementVulnerable": false,
+      "recommendedMorph": "eosinophil",
+      "indicatorColor": "#a3e635",
+      "variantIds": ["plasmo_chloroquine", "plasmo_artemisinin"],
+      "tabs": {
+        "fieldReport": "Some scientists believe Plasmodium falciparum has killed more human beings than any other organism in the history of our species. Across all of human history, on every continent the Anopheles mosquito could reach.\n\nMalaria shaped our genome. The sickle cell trait persists in populations with historical malaria exposure because one copy provides partial protection. Evolution decided dying of sickle cell was an acceptable price for surviving malaria. That is how dangerous this organism is.\n\nPlasmodium is not a bacterium or a virus. It is a eukaryotic parasite — genetically closer to you than E. coli is. It hides inside red blood cells until thousands burst simultaneously. This is why malaria fever comes in precise 48-hour cycles.",
+        "combatNotes": "Eosinophil was built for this. MBP DUMP does 3x damage against parasites — this is not game balance, it is biology. Eosinophil's Major Basic Protein is genuinely toxic to parasitic membranes.\n\nComplement cannot reach Plasmodium inside cells. Do not rely on passive damage.\n\nMEROZOITE RELEASE sends tracking projectiles that follow your last position with a delay. Counter: move one row as they release, then hold still. Stop moving. Let them miss.",
+        "funFact": "Artemisinin, the most effective anti-malarial drug, was discovered by Tu Youyou by researching ancient traditional medicine texts.\n\nShe found a 1,700-year-old recipe using sweet wormwood, written during the Jin dynasty. She extracted the active compound in 1972. She won the Nobel Prize in 2015.\n\nThe answer to one of humanity's oldest killers was in a book from the fourth century, waiting for someone to look.\n\nArtemisinin-partial resistance is now emerging in Southeast Asia. We are watching this happen in real time."
+      }
     },
-    {
+    "fungus": {
       "id": "fungus",
-      "name": "CANDIDA",
-      "fullName": "Candida albicans",
-      "type": "Dimorphic Opportunistic Fungus",
-      "threat": "MODERATE",
+      "gameEnemyId": "fungus",
+      "name": "Candida",
+      "scientificName": "Candida albicans",
+      "classification": "Dimorphic Fungal Pathogen",
+      "tier": "C",
+      "tierLabel": "NOTABLE",
+      "tierDescription": "Lives inside almost every healthy adult on Earth. Patient. Opportunistic. Waiting.",
       "color": "#c084fc",
-      "lines": [
-        "Normally harmless — it lives in your gut and on skin in yeast form. But drop immune defenses (chemotherapy, HIV, broad-spectrum antibiotics) and it switches to hyphal form: long filaments that grow through tissue, invading organs.",
-        "The spore cloud pattern is accurate. Candida disperses via aerosolized conidia and hyphal fragments that scatter in unpredictable arcs. The spores settle wherever they find warm, moist, immunocompromised surface — which, in a sick body, is everywhere.",
-        "Complement and Neutrophils handle it in healthy tissue. The real danger is in immunosuppressed patients. You are not fighting Candida because you are weak. You are fighting it because someone else already is."
-      ],
-      "counteredBy": ["neutrophil", "macrophage"],
-      "attackNote": "Spore arcs drift slowly and randomly. You have time to read their trajectory. The danger is the cloud volume — three or four spores in the same second."
+      "complementVulnerable": true,
+      "recommendedMorph": "neutrophil",
+      "indicatorColor": "#c084fc",
+      "variantIds": ["candida_hyphal", "candida_auris"],
+      "tabs": {
+        "fieldReport": "Candida albicans lives inside almost every healthy adult on Earth right now. In the mouth. The gut. The skin. It belongs there — peaceful by default, kept in check by competing bacteria and a functioning immune system.\n\nWhen antibiotics kill those bacteria, Candida has less competition. When the immune system weakens, Candida has less opposition. When both happen at once, it transforms.\n\nCandida albicans switches between two physical forms: the round, budding yeast form and the hyphal form — long, branching filaments that penetrate tissue and build biofilms on medical devices nearly impossible to sterilize. The trigger for the switch is body temperature. You are exactly warm enough to turn this organism dangerous.",
+        "combatNotes": "HYPHA STORM does not fire in a pattern. It fills space. Aim for corner tiles during the storm — edge positions take fewer hits than center columns.\n\nNeutrophil's NET Trap physically ensnares hyphae — this is accurate. Neutrophil extracellular traps literally capture fungal hyphae in real immune responses.\n\nComplement is effective here. Candida's cell wall beta-glucan activates the lectin pathway.\n\nKill speed matters. Spore density increases over fight duration. Aggression wins.",
+        "funFact": "Candida auris was first identified in 2009. It is now resistant to all three major classes of antifungal drugs in some strains. It persists on surfaces for weeks. Standard lab equipment frequently misidentifies it as a harmless fungus.\n\nThe CDC designated it an Urgent Threat in 2022.\n\nMRSA took forty years to reach that designation. Candida auris did it in thirteen.\n\nYou will encounter it in this game. Its indicator ring is white. It does not behave like standard Candida. You have been warned."
+      }
     }
-  ]
+  }
 }

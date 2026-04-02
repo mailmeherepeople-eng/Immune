@@ -1,0 +1,184 @@
+{
+  "version": "1.0",
+  "variants": {
+
+    "ecoli_o157": {
+      "id": "ecoli_o157",
+      "parentId": "bacteria",
+      "designation": "E. COLI — STRAIN O157:H7",
+      "spawnChance": 0.12,
+      "indicatorColorShift": "#cc2222",
+      "statModifiers": { "hp": 1.4, "atk": 1.6, "spd": 1.1 },
+      "specialAttackModifier": { "damage": 1.8, "pattern": "spread3" },
+      "biologyNote": "Produces Shiga toxin — a protein that hijacks ribosomes in gut cells and shuts down protein synthesis. The hemorrhagic diarrhea outbreaks you see in contaminated food news are this strain. It is significantly more dangerous than standard E. coli and your complement system handles it the same way, just slower.",
+      "combatNote": "Hits harder and fires its special more frequently. The spread is wider. Treat this like a Staph encounter, not a standard E. coli. Do not play passively."
+    },
+
+    "ecoli_biofilm": {
+      "id": "ecoli_biofilm",
+      "parentId": "bacteria",
+      "designation": "E. COLI — BIOFILM FORMER",
+      "spawnChance": 0.10,
+      "indicatorColorShift": "#991111",
+      "statModifiers": { "hp": 1.6, "atk": 1.0, "spd": 0.85, "defShieldAt50Pct": true },
+      "biologyNote": "Some E. coli strains form biofilm — a polysaccharide matrix they secrete around themselves that physically blocks immune cell contact and reduces antibiotic penetration by up to 1000x. The biofilm does not make them stronger. It makes them harder to reach. Difference matters.",
+      "combatNote": "At 50% HP, a damage shield activates. You cannot pierce it with normal attacks. The shield lasts 5 seconds then dissolves. Use that window. Skills that deal AoE or true damage bypass the shield entirely — Granzyme and NET Trap both work."
+    },
+
+    "ecoli_esbl": {
+      "id": "ecoli_esbl",
+      "parentId": "bacteria",
+      "designation": "E. COLI — ESBL PRODUCER",
+      "spawnChance": 0.08,
+      "indicatorColorShift": "#880000",
+      "statModifiers": { "hp": 1.3, "atk": 1.2, "complementResistance": 0.5 },
+      "biologyNote": "Extended-spectrum beta-lactamase. An enzyme that breaks down the beta-lactam ring found in most penicillin-family antibiotics. Your complement system still activates, but ESBL producers have partial resistance — the membrane pores form more slowly. First observed in clinical settings in the 1980s. Now found in rivers, soil, and livestock worldwide.",
+      "combatNote": "Complement damage is halved on this variant. The golden shimmer still appears but the tick damage is reduced. You need to do more of the work yourself. Macrophage Engulf or Neutrophil still optimal — just do not rely on passive attrition to finish it."
+    },
+
+    "staph_biofilm": {
+      "id": "staph_biofilm",
+      "parentId": "bacteria2",
+      "designation": "STAPH — BIOFILM VARIANT",
+      "spawnChance": 0.14,
+      "indicatorColorShift": "#cc4444",
+      "statModifiers": { "hp": 1.8, "atk": 1.0, "spd": 0.8, "defShieldAt60Pct": true },
+      "biologyNote": "Staphylococcal biofilm is particularly problematic on medical implants — catheters, joint replacements, pacemakers. Once established, the biofilm cannot be cleared by antibiotics at safe doses. The implant must be surgically removed. This is a significant cause of hospital readmissions worldwide.",
+      "combatNote": "Shield triggers at 60% HP rather than 50%. Hits harder than standard Staph but moves slower. The trade is deliberate — it is sacrificing mobility for fortification. Match aggression to the shield window."
+    },
+
+    "staph_toxin": {
+      "id": "staph_toxin",
+      "parentId": "bacteria2",
+      "designation": "STAPH — TOXIC SHOCK STRAIN",
+      "spawnChance": 0.09,
+      "indicatorColorShift": "#bb3333",
+      "statModifiers": { "hp": 1.1, "atk": 2.0, "spd": 1.3 },
+      "specialAttackModifier": { "cooldown": 0.6, "damage": 2.2 },
+      "biologyNote": "Toxic Shock Syndrome Toxin-1 (TSST-1) is a superantigen — it binds directly to immune receptors outside the normal antigen-recognition process, activating up to 20% of all T-cells simultaneously. The resulting cytokine surge causes systemic inflammation, organ failure, and rapid death. Named after tampon-associated outbreaks in the 1980s, though the toxin has been known since the 1970s.",
+      "combatNote": "Its special attack fires nearly twice as fast and deals double damage. This variant can kill a low-HP player in two special attacks. Prioritize survival over damage. Heal first. Then deal with it."
+    },
+
+    "rhino_serotype": {
+      "id": "rhino_serotype",
+      "parentId": "virus",
+      "designation": "RHINOVIRUS — SEROTYPE VARIANT",
+      "spawnChance": 0.15,
+      "indicatorColorShift": "#dd6600",
+      "statModifiers": { "hp": 1.0, "atk": 1.0, "spd": 1.0, "memoryTagImmune": true },
+      "biologyNote": "There are over 160 known serotypes of rhinovirus, each with different surface protein configurations. Antibodies generated against one serotype do not recognize others. This is why you can catch a cold multiple times per year — each time it may be a different serotype, and your immune memory from previous infections provides no cross-protection. A vaccine for the common cold would require 160 components. Nobody has made it work.",
+      "combatNote": "Statistically identical to standard Rhinovirus. The only difference: B-Cell Memory Tag provides zero bonus here. This variant's surface proteins do not match the template in your memory cells. Mechanically, fight it the same. Educationally, notice what does not work."
+    },
+
+    "rhino_cold_adapted": {
+      "id": "rhino_cold_adapted",
+      "parentId": "virus",
+      "designation": "RHINOVIRUS — COLD-ADAPTED",
+      "spawnChance": 0.08,
+      "indicatorColorShift": "#ee7700",
+      "statModifiers": { "hp": 0.9, "atk": 1.0, "spd": 1.7 },
+      "biologyNote": "Some rhinovirus strains are unusually well-adapted to cooler temperatures — they replicate faster in the upper airway and nose than typical strains. Cold-adaptation is an evolutionary pressure: strains that replicate fastest in 33-degree nasal passages spread to more hosts before the immune system responds. This is active selection pressure happening in your nose every winter.",
+      "combatNote": "Significantly faster movement and attack speed. Lower HP to compensate. This is a glass cannon — hit it fast before it fills the grid with projectiles. NK Cell or T-Cell recommended. Do not play defensive."
+    },
+
+    "flu_antigenic_shift": {
+      "id": "flu_antigenic_shift",
+      "parentId": "virus2",
+      "designation": "INFLUENZA — ANTIGENIC SHIFT VARIANT",
+      "spawnChance": 0.07,
+      "indicatorColorShift": "#cc8800",
+      "statModifiers": { "hp": 2.0, "atk": 1.8, "spd": 1.2, "memoryTagImmune": true },
+      "biologyNote": "Antigenic shift is not gradual. It is a sudden, complete replacement of surface proteins caused by genetic reassortment between human, avian, and swine influenza strains in a co-infected host. The 1918, 1957, 1968, and 2009 pandemic strains all emerged through antigenic shift. Your immune system has never seen this configuration before and has no partial protection. Neither has anyone else's.",
+      "combatNote": "Appears without warning, replacing a standard Influenza encounter. Significantly stronger. Memory Tag does nothing — this is a completely novel strain, your antibodies do not recognize it. NK Cell Granzyme is your cleanest option. If you do not have NK Cell unlocked, this fight will be hard. That is intentional."
+    },
+
+    "flu_h5n1": {
+      "id": "flu_h5n1",
+      "parentId": "virus2",
+      "designation": "INFLUENZA — H5N1 AVIAN STRAIN",
+      "spawnChance": 0.04,
+      "indicatorColorShift": "#996600",
+      "statModifiers": { "hp": 2.5, "atk": 2.5, "spd": 1.0, "complementResistance": 0.7, "memoryTagImmune": true },
+      "biologyNote": "H5N1 is an avian influenza strain that occasionally crosses into humans through direct contact with infected birds. The case fatality rate in documented human infections is approximately 60%. It does not yet spread efficiently between humans. The word 'yet' is doing significant work in that sentence. Public health officials call it their greatest pandemic concern. When it acquires human-to-human transmission, it will move fast.",
+      "combatNote": "Rare encounter. Very high HP, very high damage, near-total complement resistance. This is a test of your full kit: Dendritic Antigen Scan, mid-battle morph to NK Cell, Granzyme. Memory Tag is useless. If you have not unlocked Extramedullary Hematopoiesis, this encounter will defeat you. That is fine. Come back when you are ready."
+    },
+
+    "mrsa_ha": {
+      "id": "mrsa_ha",
+      "parentId": "superbug",
+      "designation": "MRSA — HOSPITAL-ACQUIRED STRAIN (HA-MRSA)",
+      "spawnChance": 0.12,
+      "indicatorColorShift": "#ddaa00",
+      "statModifiers": { "hp": 1.6, "atk": 1.5, "def": 1.4, "complementResistance": 1.0 },
+      "biologyNote": "Hospital-Acquired MRSA is distinct from community-acquired MRSA. HA-MRSA strains have been exposed to a wider range of antibiotics in the hospital environment and have acquired resistance genes accordingly. They often carry multiple resistance determinants simultaneously. They are why you are not supposed to bring outside food into ICUs. They are why hospitals have infection control specialists. They are why hand-washing saves lives.",
+      "combatNote": "Higher stats across the board compared to standard MRSA. Antigen Scan still works — run the Dendritic-then-damage-morph sequence. Allow more time for the fight. If you are under 40% HP when this spawns, consider fleeing and recovering first."
+    },
+
+    "mrsa_vrsa": {
+      "id": "mrsa_vrsa",
+      "parentId": "superbug",
+      "designation": "MRSA — VRSA VARIANT",
+      "spawnChance": 0.05,
+      "indicatorColorShift": "#ffcc00",
+      "statModifiers": { "hp": 2.2, "atk": 1.8, "def": 1.8, "complementResistance": 1.0, "antigenScanResistsFirstUse": true },
+      "biologyNote": "Vancomycin was the antibiotic of last resort — the drug you use when every other antibiotic has failed. Vancomycin-Resistant Staphylococcus aureus acquired resistance through horizontal gene transfer from Enterococcus bacteria, which had already developed vancomycin resistance. The resistance gene jumped species. In a hospital room. Probably while a patient was being treated. We are running out of last resorts.",
+      "combatNote": "Antigen Scan FAILS on first use — this variant has a modified surface that resists initial analysis. You must apply Antigen Scan twice. The second application works normally. This means you need more time in Dendritic Cell form than standard MRSA. Plan your ATP accordingly. Do not panic when the first scan fails."
+    },
+
+    "mrsa_biofilm": {
+      "id": "mrsa_biofilm",
+      "parentId": "superbug",
+      "designation": "MRSA — BIOFILM COMBINED",
+      "spawnChance": 0.06,
+      "indicatorColorShift": "#bb9900",
+      "statModifiers": { "hp": 2.0, "atk": 1.4, "spd": 0.7, "defShieldAt50Pct": true, "complementResistance": 1.0 },
+      "biologyNote": "Some MRSA strains combine antibiotic resistance with biofilm formation — two independently evolved defense mechanisms that, when combined, create an organism that is both chemically resistant and physically protected. This combination is increasingly common in hospital environments and is a significant contributor to chronic wound infections and implant failures.",
+      "combatNote": "Slower than standard MRSA but more durable. The 50% HP shield triggers in addition to its base high defense and complement immunity. Antigen Scan must be applied before the shield triggers or you will be locked out of dealing meaningful damage during the shield window. Time your sequence carefully."
+    },
+
+    "plasmo_chloroquine": {
+      "id": "plasmo_chloroquine",
+      "parentId": "parasite",
+      "designation": "PLASMODIUM — CHLOROQUINE-RESISTANT",
+      "spawnChance": 0.11,
+      "indicatorColorShift": "#88bb00",
+      "statModifiers": { "hp": 1.4, "atk": 1.3, "complementResistance": 0.25 },
+      "biologyNote": "Chloroquine was the primary anti-malarial treatment from the 1940s until resistance emerged in Southeast Asia and South America in the late 1950s. By the 1980s, chloroquine-resistant Plasmodium had spread globally. Millions of people died in the gap between resistance emerging and alternative drugs being deployed. The resistance mutation involves a single amino acid change in a transport protein. One amino acid. Global consequences.",
+      "combatNote": "Your complement system is 75% less effective against this variant — the passive damage that makes standard Plasmodium manageable is nearly absent here. Eosinophil MBP Dump is unaffected by the resistance. Rely on active damage, not passive attrition."
+    },
+
+    "plasmo_artemisinin": {
+      "id": "plasmo_artemisinin",
+      "parentId": "parasite",
+      "designation": "PLASMODIUM — ARTEMISININ-PARTIAL RESISTANCE",
+      "spawnChance": 0.06,
+      "indicatorColorShift": "#aaee00",
+      "statModifiers": { "hp": 2.0, "atk": 1.6, "spd": 1.2, "complementResistance": 1.0, "netTrapReducedEffect": true },
+      "biologyNote": "Artemisinin partial resistance was first confirmed in Cambodia in 2009. It has since spread to Vietnam, Thailand, Laos, and Myanmar. The mutation causes Plasmodium to enter a dormant state when artemisinin is present, then resume replication after the drug clears. This is not full resistance — the drug still works, just more slowly. Combined with piperaquine resistance (which is following the same geographic spread), treatment failure rates in some regions exceed 50%. This is what happens before a drug stops working entirely.",
+      "combatNote": "Near-total complement immunity and partial resistance to NET Trap — the trap still applies but the damage-over-time effect is reduced. Merozoite Release fires more projectiles than the standard version. Eosinophil MBP Dump is still your primary tool and is unaffected by this resistance. Toxic Granules AoE for burst. This is the hardest Plasmodium encounter. You will probably die on the first attempt."
+    },
+
+    "candida_hyphal": {
+      "id": "candida_hyphal",
+      "parentId": "fungus",
+      "designation": "CANDIDA — HYPHAL DOMINANT",
+      "spawnChance": 0.13,
+      "indicatorColorShift": "#9933cc",
+      "statModifiers": { "hp": 1.5, "atk": 1.3, "phagocytosisImmuneDuration": 8 },
+      "biologyNote": "Candida albicans in hyphal form expresses surface proteins that actively interfere with phagocyte recognition. Specifically, hyphae can escape from phagosomes after being engulfed — they pierce through the macrophage membrane and kill the phagocyte. The organism that was supposed to eat it gets eaten from the inside. Evolution does not care about fairness.",
+      "combatNote": "Cannot be Engulfed for the first 8 seconds — the skill activates but deals no damage while Candida is in hyphal form. After 8 seconds it reverts to yeast form and becomes vulnerable again. NET Trap works during the hyphal phase. Use it. Then Engulf when the form switches."
+    },
+
+    "candida_auris": {
+      "id": "candida_auris",
+      "parentId": "fungus",
+      "designation": "CANDIDA AURIS",
+      "spawnChance": 0.04,
+      "indicatorColorShift": "#ffffff",
+      "statModifiers": { "hp": 2.5, "atk": 2.0, "spd": 1.5, "complementResistance": 0.8, "antigenScanResistsFirstUse": true },
+      "biologyNote": "Candida auris is not a variant of Candida albicans — it is a separate species that emerged almost simultaneously on three different continents around 2009, which is unusual and not fully understood. It is resistant to all three major antifungal drug classes in some strains. It persists on skin, surfaces, and medical equipment. Standard lab tests misidentify it. It spreads between patients in ICUs. The CDC Urgent Threat designation is the highest category they issue.",
+      "combatNote": "White indicator ring. If you see white, understand what you are facing before engaging.\n\nAntigen Scan fails on first use. Complement is 80% less effective. Moves faster than any standard Candida. NET Trap is your most reliable tool. Hypha Storm fires earlier in the fight than normal Candida.\n\nThis encounter is designed to be survived, not dominated on first contact. Retreat is valid. Come back prepared."
+    }
+
+  }
+}

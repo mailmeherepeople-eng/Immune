@@ -744,41 +744,20 @@ canvas { image-rendering: pixelated; display: block; }
 /* ════════════════════════════════════════════════════════
    CODEX SCREEN
    ════════════════════════════════════════════════════════ */
-#codex-screen {
-  background: #060610;
-  flex-direction: column;
-  align-items: stretch;
-  overflow: hidden;
-}
-#codex-header {
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(10,10,20,0.98);
-  display: flex; align-items: center; gap: 10px;
-  flex-shrink: 0;
-}
-#codex-title {
-  font-size: clamp(13px, 3.5vw, 18px);
-  color: var(--gold); letter-spacing: 4px; font-weight: 700;
-  text-shadow: 0 0 20px var(--gold-glow);
-}
-#codex-subtitle {
-  font-size: clamp(6px, 1.8vw, 9px);
-  color: var(--text-dim); letter-spacing: 2px; margin-top: 2px;
-}
-#codex-back-btn {
-  margin-left: auto; padding: 5px 12px;
-  font-size: clamp(9px, 2.3vw, 11px);
-  width: auto; flex-shrink: 0;
-}
-#codex-content {
-  display: flex; flex: 1; overflow: hidden;
-}
-#codex-list {
-  width: 30%; min-width: 90px; max-width: 160px;
+/* ════════════════════════════════════════════════════════
+   CODEX / FIELD INTELLIGENCE PANEL
+   ════════════════════════════════════════════════════════ */
+#codex-panel .overlay-header h2 { color: var(--gold); letter-spacing: 4px; text-shadow: 0 0 20px var(--gold-glow); }
+#codex-content { display: flex; flex: 1; overflow: hidden; }
+#codex-list-wrap {
+  width: 30%; min-width: 100px; max-width: 180px;
   border-right: 1px solid var(--border);
-  overflow-y: auto; padding: 4px 0;
+  overflow-y: auto; padding: 6px 0;
   flex-shrink: 0;
+}
+.codex-section-label {
+  font-size: clamp(6px, 1.6vw, 8px); color: var(--text-dim);
+  letter-spacing: 2px; padding: 8px 10px 4px; font-weight: 700;
 }
 .codex-entry {
   padding: 7px 10px; cursor: pointer;
@@ -788,10 +767,7 @@ canvas { image-rendering: pixelated; display: block; }
   border-left: 3px solid transparent;
 }
 .codex-entry:active { background: rgba(255,255,255,0.05); }
-.codex-entry.active {
-  background: rgba(251,191,36,0.07);
-  border-left-color: var(--gold);
-}
+.codex-entry.active { background: rgba(251,191,36,0.07); }
 .codex-entry.locked { opacity: 0.35; cursor: default; }
 .codex-entry-dot {
   width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
@@ -803,81 +779,125 @@ canvas { image-rendering: pixelated; display: block; }
 }
 .codex-entry.locked .codex-entry-name { color: var(--text-dim); }
 #codex-detail {
-  flex: 1; overflow-y: auto; padding: 12px 16px;
+  flex: 1; overflow-y: auto; padding: 14px 16px;
 }
+/* Tier badge */
+.codex-tier-badge {
+  display: inline-block; font-size: clamp(9px, 2.5vw, 13px);
+  padding: 2px 10px; border-radius: 3px;
+  font-weight: 700; letter-spacing: 2px;
+  border: 1px solid currentColor; margin-bottom: 6px;
+}
+.codex-tier-badge.tier-E { color: #94a3b8; }
+.codex-tier-badge.tier-D { color: #22c55e; text-shadow: 0 0 8px rgba(34,197,94,0.3); }
+.codex-tier-badge.tier-C { color: #3b82f6; text-shadow: 0 0 8px rgba(59,130,246,0.3); }
+.codex-tier-badge.tier-B { color: #a78bfa; text-shadow: 0 0 12px rgba(167,139,250,0.3); }
+.codex-tier-badge.tier-A { color: #f97316; text-shadow: 0 0 14px rgba(249,115,22,0.4); }
+.codex-tier-badge.tier-S {
+  color: #fbbf24; text-shadow: 0 0 18px rgba(251,191,36,0.5);
+  animation: tierPulse 2s ease-in-out infinite;
+}
+@keyframes tierPulse {
+  0%,100% { text-shadow: 0 0 18px rgba(251,191,36,0.5); }
+  50% { text-shadow: 0 0 30px rgba(251,191,36,0.8), 0 0 60px rgba(251,191,36,0.3); }
+}
+.codex-detail-header { margin-bottom: 4px; }
+.codex-detail-header.tier-S { position: relative; }
+.codex-detail-header.tier-S::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(251,191,36,0.03) 2px, rgba(251,191,36,0.03) 4px);
+  animation: scanlines 4s linear infinite;
+}
+@keyframes scanlines { 0% { transform: translateY(0); } 100% { transform: translateY(4px); } }
 .codex-detail-name {
-  font-size: clamp(13px, 3.8vw, 20px); color: var(--gold);
-  font-weight: 700; letter-spacing: 3px; margin-bottom: 2px;
+  font-size: clamp(14px, 4vw, 22px); font-weight: 700;
+  letter-spacing: 3px; margin-bottom: 2px;
 }
 .codex-detail-sci {
   font-size: clamp(7px, 2vw, 10px); color: var(--text-dim);
-  letter-spacing: 1px; margin-bottom: 8px; font-style: italic;
+  letter-spacing: 1px; font-style: italic;
 }
-.codex-detail-tags {
-  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; align-items: center;
+.codex-detail-class {
+  font-size: clamp(6px, 1.6vw, 9px); color: var(--text-dim);
+  letter-spacing: 2px; margin-top: 2px; text-transform: uppercase;
 }
-.codex-tag {
-  font-size: clamp(6px, 1.8vw, 9px); padding: 2px 7px;
-  border-radius: 3px; border: 1px solid currentColor;
-  letter-spacing: 1px; font-weight: 700;
+.codex-status-line {
+  font-size: clamp(7px, 1.8vw, 10px); letter-spacing: 2px;
+  font-weight: 700; margin: 8px 0 4px;
 }
-.codex-tag.threat-LOW    { color: #22c55e; }
-.codex-tag.threat-MODERATE { color: #fbbf24; }
-.codex-tag.threat-HIGH   { color: #f97316; }
-.codex-tag.threat-CRITICAL { color: #ef4444; }
-.codex-tag.type-tag { color: var(--text-dim); font-weight: 400; }
-.codex-divider {
-  height: 1px; background: var(--border); margin: 8px 0;
+.codex-status-line.vulnerable { color: #22c55e; }
+.codex-status-line.resistant { color: #ef4444; }
+.codex-divider { height: 1px; background: var(--border); margin: 8px 0; }
+/* Mastery */
+.codex-mastery {
+  font-size: clamp(7px, 1.8vw, 10px); color: var(--text);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 4px;
 }
-.codex-lore-line {
-  font-size: clamp(7px, 2vw, 10px); color: var(--text);
-  line-height: 1.75; margin-bottom: 8px;
+.codex-mastery-label { color: var(--text-dim); letter-spacing: 1px; }
+.codex-mastery-dots { letter-spacing: 2px; }
+/* Variant summary */
+.codex-variant-summary {
+  font-size: clamp(7px, 1.8vw, 10px); color: var(--text-dim);
+  margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
 }
-.codex-lore-line::before {
-  content: '// '; color: var(--text-dim);
+.codex-variant-boxes { display: flex; gap: 3px; }
+.codex-variant-box {
+  width: 10px; height: 10px; border: 1px solid var(--border-light);
+  border-radius: 2px;
 }
-.codex-combat-label {
-  font-size: clamp(6px, 1.8vw, 9px); color: #5eead4;
-  letter-spacing: 2px; font-weight: 700; margin-top: 10px; margin-bottom: 4px;
+.codex-variant-box.filled { background: var(--accent); border-color: var(--accent); }
+/* Tabs */
+.codex-tabs {
+  display: flex; gap: 0; margin: 8px 0 4px; border-bottom: 1px solid var(--border);
 }
-.codex-combat-note {
-  font-size: clamp(7px, 2vw, 10px); color: #5eead4;
-  line-height: 1.65; border-left: 2px solid rgba(94,234,212,0.4);
-  padding-left: 8px;
+.codex-tab {
+  font-family: var(--font-pixel);
+  font-size: clamp(6px, 1.6vw, 9px); padding: 6px 10px;
+  color: var(--text-dim); letter-spacing: 1px; font-weight: 700;
+  background: transparent; border: none; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
 }
+.codex-tab.active { color: var(--text-bright); border-bottom-color: var(--gold); }
+.codex-tab-content {
+  font-size: clamp(8px, 2.2vw, 11px); color: #b0bcd0;
+  line-height: 1.8; padding: 8px 0;
+}
+.codex-tab-content p { margin-bottom: 10px; }
+/* Known variants in detail */
+.codex-known-variants-label {
+  font-size: clamp(6px, 1.6vw, 9px); color: var(--text-dim);
+  letter-spacing: 2px; font-weight: 700; margin-top: 10px; margin-bottom: 6px;
+}
+.codex-known-variant-item {
+  font-size: clamp(7px, 1.8vw, 10px); color: var(--text-dim);
+  padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.codex-known-variant-item.discovered { color: var(--text); }
 .codex-empty {
   color: var(--text-dim); font-size: clamp(9px, 2.5vw, 12px);
   text-align: center; padding: 30px 20px; line-height: 2.2;
-}
-.codex-countered-label {
-  font-size: clamp(6px, 1.8vw, 9px); color: var(--text-dim);
-  letter-spacing: 2px; margin-top: 8px; margin-bottom: 4px;
-}
-.codex-counter-pills {
-  display: flex; gap: 5px; flex-wrap: wrap;
-}
-.codex-counter-pill {
-  font-size: clamp(6px, 1.8vw, 9px); padding: 2px 7px;
-  border-radius: 10px; border: 1px solid rgba(167,139,250,0.4);
-  color: #a78bfa; letter-spacing: 1px;
 }
 </style>
 </head>
 <body>
 
-<!-- CODEX SCREEN -->
-<div id="codex-screen" class="screen">
-  <div id="codex-header">
-    <div>
-      <div id="codex-title">PATHOGEN CODEX</div>
-      <div id="codex-subtitle">FIELD OPERATIVE DATABASE — CLASSIFIED</div>
-    </div>
-    <button class="menu-button secondary" id="codex-back-btn">← BACK</button>
+<!-- CODEX / FIELD INTELLIGENCE PANEL (overlay-panel, not a screen) -->
+<div id="codex-panel" class="overlay-panel">
+  <div class="overlay-header">
+    <h2>FIELD INTELLIGENCE</h2>
+    <button class="close-button" id="codex-close-btn">X</button>
   </div>
   <div id="codex-content">
-    <div id="codex-list"></div>
+    <div id="codex-list-wrap">
+      <div class="codex-section-label">ORGANISMS</div>
+      <div id="codex-list-organisms"></div>
+      <div class="codex-section-label" style="margin-top:6px">VARIANTS</div>
+      <div id="codex-list-variants"></div>
+    </div>
     <div id="codex-detail">
-      <div class="codex-empty">SELECT AN ENTRY<br>FROM THE LIST</div>
+      <div class="codex-empty">SELECT AN ENTRY<br>FROM THE LIST<br><br>Defeat enemies to<br>unlock their files.</div>
     </div>
   </div>
 </div>
@@ -2619,63 +2639,162 @@ const Audio = {
 };
 
 /* ╔═══════════════════════════════════════════════════════════════╗
-   ║  CODEX — Pathogen database loaded from assets/codex.json     ║
+   ║  CODEX MANAGER — loads JSON, manages localStorage, UI        ║
    ╚═══════════════════════════════════════════════════════════════╝ */
 
-const Codex = {
-  data: null,       // { enemies: [...] } from JSON
-  selectedId: null, // currently highlighted entry
+const CodexManager = {
+  codexData: null,      // parsed codex.json { entries: { ... } }
+  variantData: null,    // parsed codex_variants.json { variants: { ... } }
+  loaded: false,
+  selectedId: null,
+  selectedType: null,   // 'organism' or 'variant'
+  activeTab: 'fieldReport',
 
-  async load() {
+  // ─── localStorage state ───
+  state: {
+    discovered: {},
+    killCounts: {},
+    variantsDiscovered: {},
+    variantKillCounts: {},
+  },
+
+  SAVE_KEY: 'biocell_codex_save',
+
+  loadState() {
     try {
-      const r = await fetch('assets/codex.json');
-      this.data = await r.json();
+      const s = JSON.parse(localStorage.getItem(this.SAVE_KEY));
+      if (s) {
+        this.state.discovered = s.discovered || {};
+        this.state.killCounts = s.killCounts || {};
+        this.state.variantsDiscovered = s.variantsDiscovered || {};
+        this.state.variantKillCounts = s.variantKillCounts || {};
+      }
+    } catch(e) {}
+  },
+
+  saveState() {
+    localStorage.setItem(this.SAVE_KEY, JSON.stringify(this.state));
+  },
+
+  async loadData() {
+    if (this.loaded) return;
+    try {
+      const [cRes, vRes] = await Promise.all([
+        fetch('assets/codex.json'),
+        fetch('assets/codex_variants.json'),
+      ]);
+      this.codexData = await cRes.json();
+      this.variantData = await vRes.json();
+      this.loaded = true;
     } catch(e) {
-      this.data = { enemies: [] };
+      this.codexData = { entries: {} };
+      this.variantData = { variants: {} };
+      this.loaded = true;
     }
   },
 
-  // Return set of defeated enemy ids from Game state
-  _defeated() {
-    return Game.defeatedEnemies || {};
+  // Called after battle victory
+  recordKill(enemyKey, variantId) {
+    // Discover + count base enemy
+    if (!this.state.discovered[enemyKey]) {
+      this.state.discovered[enemyKey] = true;
+      const entry = this.codexData && this.codexData.entries[enemyKey];
+      Game.notify('CODEX UPDATED: ' + (entry ? entry.name : enemyKey), '#fbbf24');
+    }
+    this.state.killCounts[enemyKey] = (this.state.killCounts[enemyKey] || 0) + 1;
+
+    // Discover + count variant
+    if (variantId) {
+      if (!this.state.variantsDiscovered[variantId]) {
+        this.state.variantsDiscovered[variantId] = true;
+        const v = this.variantData && this.variantData.variants[variantId];
+        Game.notify('CODEX UPDATED — NEW VARIANT: ' + (v ? v.designation : variantId), '#fbbf24');
+      }
+      this.state.variantKillCounts[variantId] = (this.state.variantKillCounts[variantId] || 0) + 1;
+    }
+    this.saveState();
   },
 
-  open(fromScreen) {
-    this._fromScreen = fromScreen || 'title-screen';
+  isDiscovered(enemyKey) { return !!this.state.discovered[enemyKey]; },
+  getKillCount(enemyKey) { return this.state.killCounts[enemyKey] || 0; },
+  isVariantDiscovered(variantId) { return !!this.state.variantsDiscovered[variantId]; },
+  getVariantKillCount(variantId) { return this.state.variantKillCounts[variantId] || 0; },
+
+  hasAnyDiscovered() {
+    return Object.values(this.state.discovered).some(v => v);
+  },
+
+  // Mastery label + dots from kill count
+  getMastery(kills) {
+    if (kills >= 500) return { label: 'DOMINANT',       dots: '\u25CF\u25CF\u25CF\u25CF\u25CF' };
+    if (kills >= 100) return { label: 'IMMUNISED',      dots: '\u25CF\u25CF\u25CF\u25CF\u25CB' };
+    if (kills >= 25)  return { label: 'MEMORY',         dots: '\u25CF\u25CF\u25CF\u25CB\u25CB' };
+    if (kills >= 5)   return { label: 'EXPOSURE',       dots: '\u25CF\u25CF\u25CB\u25CB\u25CB' };
+    if (kills >= 1)   return { label: 'FIRST CONTACT',  dots: '\u25CF\u25CB\u25CB\u25CB\u25CB' };
+    return { label: 'UNENCOUNTERED', dots: '' };
+  },
+
+  // Resolve variant when stepping on encounter tile
+  resolveEncounter(enemyKey) {
+    if (!this.loaded || !this.variantData) return { enemyKey, variantId: null, variant: null };
+    const variants = Object.values(this.variantData.variants).filter(v => v.parentId === enemyKey);
+    for (const variant of variants) {
+      if (Math.random() < variant.spawnChance) {
+        return { enemyKey, variantId: variant.id, variant };
+      }
+    }
+    return { enemyKey, variantId: null, variant: null };
+  },
+
+  // ─── UI ───
+  async open() {
+    await this.loadData();
     this.selectedId = null;
-    document.getElementById('codex-back-btn').onclick = () => this.close();
+    this.selectedType = null;
+    this.activeTab = 'fieldReport';
+    document.getElementById('codex-close-btn').onclick = () => this.close();
     this.renderList();
     this.renderDetail(null);
-    Game.showScreen('codex-screen');
-    // Auto-select first unlocked entry
-    if (this.data && this.data.enemies.length) {
-      const first = this.data.enemies.find(e => this._defeated()[e.id]);
-      if (first) this.selectEntry(first.id);
-    }
+    document.getElementById('codex-panel').classList.add('visible');
+    // Auto-select first discovered entry
+    const entries = this.codexData ? Object.values(this.codexData.entries) : [];
+    const first = entries.find(e => this.state.discovered[e.id]);
+    if (first) this.selectEntry(first.id, 'organism');
   },
 
   close() {
-    Game.showScreen(this._fromScreen || 'title-screen');
+    document.getElementById('codex-panel').classList.remove('visible');
   },
 
-  selectEntry(id) {
+  selectEntry(id, type) {
     this.selectedId = id;
-    this.renderList(); // refresh active state
-    const entry = this.data.enemies.find(e => e.id === id);
-    this.renderDetail(entry);
+    this.selectedType = type;
+    this.activeTab = 'fieldReport';
+    this.renderList();
+    if (type === 'organism') {
+      const entry = this.codexData.entries[id];
+      this.renderDetail(entry);
+    } else {
+      const variant = this.variantData.variants[id];
+      this.renderVariantDetail(variant);
+    }
   },
 
   renderList() {
-    const list = document.getElementById('codex-list');
-    list.innerHTML = '';
-    if (!this.data) return;
-    const defeated = this._defeated();
-    this.data.enemies.forEach(entry => {
-      const unlocked = !!defeated[entry.id];
+    const orgList = document.getElementById('codex-list-organisms');
+    const varList = document.getElementById('codex-list-variants');
+    orgList.innerHTML = '';
+    varList.innerHTML = '';
+    if (!this.codexData) return;
+
+    // Organisms
+    Object.values(this.codexData.entries).forEach(entry => {
+      const unlocked = this.state.discovered[entry.id];
       const el = document.createElement('div');
       el.className = 'codex-entry' +
-        (this.selectedId === entry.id ? ' active' : '') +
+        (this.selectedId === entry.id && this.selectedType === 'organism' ? ' active' : '') +
         (!unlocked ? ' locked' : '');
+      if (unlocked) el.style.borderLeftColor = entry.color;
 
       const dot = document.createElement('div');
       dot.className = 'codex-entry-dot';
@@ -2684,14 +2803,42 @@ const Codex = {
 
       const name = document.createElement('div');
       name.className = 'codex-entry-name';
+      if (unlocked) name.style.color = entry.color;
       name.textContent = unlocked ? entry.name : '???';
       el.appendChild(name);
 
       if (unlocked) {
-        el.addEventListener('click', () => this.selectEntry(entry.id));
-        el.addEventListener('touchend', (e) => { e.preventDefault(); this.selectEntry(entry.id); }, { passive: false });
+        el.addEventListener('click', () => this.selectEntry(entry.id, 'organism'));
+        el.addEventListener('touchend', (e) => { e.preventDefault(); this.selectEntry(entry.id, 'organism'); }, { passive: false });
       }
-      list.appendChild(el);
+      orgList.appendChild(el);
+    });
+
+    // Variants
+    if (!this.variantData) return;
+    Object.values(this.variantData.variants).forEach(v => {
+      const unlocked = this.state.variantsDiscovered[v.id];
+      const el = document.createElement('div');
+      el.className = 'codex-entry' +
+        (this.selectedId === v.id && this.selectedType === 'variant' ? ' active' : '') +
+        (!unlocked ? ' locked' : '');
+      if (unlocked) el.style.borderLeftColor = v.indicatorColorShift;
+
+      const dot = document.createElement('div');
+      dot.className = 'codex-entry-dot';
+      dot.style.background = unlocked ? v.indicatorColorShift : '#333';
+      el.appendChild(dot);
+
+      const name = document.createElement('div');
+      name.className = 'codex-entry-name';
+      name.textContent = unlocked ? v.designation : '???';
+      el.appendChild(name);
+
+      if (unlocked) {
+        el.addEventListener('click', () => this.selectEntry(v.id, 'variant'));
+        el.addEventListener('touchend', (e) => { e.preventDefault(); this.selectEntry(v.id, 'variant'); }, { passive: false });
+      }
+      varList.appendChild(el);
     });
   },
 
@@ -2701,76 +2848,184 @@ const Codex = {
       detail.innerHTML = '<div class="codex-empty">SELECT AN ENTRY<br>FROM THE LIST<br><br>Defeat enemies to<br>unlock their files.</div>';
       return;
     }
-    const morphNames = {
-      neutrophil: 'NEUTROPHIL', macrophage: 'MACROPHAGE',
-      nk_cell: 'NK CELL', b_cell: 'B-CELL',
-      t_cell: 'T-CELL', dendritic: 'DENDRITIC', eosinophil: 'EOSINOPHIL',
-    };
     detail.innerHTML = '';
+    const kills = this.getKillCount(entry.id);
+    const mastery = this.getMastery(kills);
+
+    // Header block
+    const header = document.createElement('div');
+    header.className = 'codex-detail-header' + (entry.tier === 'S' ? ' tier-S' : '');
+
+    const badge = document.createElement('div');
+    badge.className = 'codex-tier-badge tier-' + entry.tier;
+    badge.textContent = entry.tier + ' — ' + entry.tierLabel;
+    header.appendChild(badge);
 
     const nameEl = document.createElement('div');
     nameEl.className = 'codex-detail-name';
     nameEl.style.color = entry.color;
     nameEl.textContent = entry.name;
-    detail.appendChild(nameEl);
+    header.appendChild(nameEl);
 
     const sciEl = document.createElement('div');
     sciEl.className = 'codex-detail-sci';
-    sciEl.textContent = entry.fullName;
-    detail.appendChild(sciEl);
+    sciEl.textContent = entry.scientificName;
+    header.appendChild(sciEl);
 
-    const tags = document.createElement('div');
-    tags.className = 'codex-detail-tags';
-    const threatTag = document.createElement('span');
-    threatTag.className = `codex-tag threat-${entry.threat}`;
-    threatTag.textContent = 'THREAT: ' + entry.threat;
-    tags.appendChild(threatTag);
-    const typeTag = document.createElement('span');
-    typeTag.className = 'codex-tag type-tag';
-    typeTag.textContent = entry.type;
-    tags.appendChild(typeTag);
-    detail.appendChild(tags);
+    const classEl = document.createElement('div');
+    classEl.className = 'codex-detail-class';
+    classEl.textContent = entry.classification;
+    header.appendChild(classEl);
 
-    const div1 = document.createElement('div');
-    div1.className = 'codex-divider';
-    detail.appendChild(div1);
+    detail.appendChild(header);
 
-    entry.lines.forEach(line => {
-      const p = document.createElement('div');
-      p.className = 'codex-lore-line';
-      p.textContent = line;
-      detail.appendChild(p);
+    // Complement status
+    const statusEl = document.createElement('div');
+    statusEl.className = 'codex-status-line ' + (entry.complementVulnerable ? 'vulnerable' : 'resistant');
+    statusEl.textContent = 'COMPLEMENT: ' + (entry.complementVulnerable ? 'VULNERABLE' : 'RESISTANT');
+    detail.appendChild(statusEl);
+
+    detail.appendChild(this._divider());
+
+    // Mastery line
+    const masteryEl = document.createElement('div');
+    masteryEl.className = 'codex-mastery';
+    masteryEl.innerHTML = '<span>DEFEATS: ' + kills + '</span>' +
+      '<span class="codex-mastery-dots">' + mastery.dots + '</span>' +
+      '<span class="codex-mastery-label">' + mastery.label + '</span>';
+    detail.appendChild(masteryEl);
+
+    // Variant summary
+    const variantIds = entry.variantIds || [];
+    const discoveredCount = variantIds.filter(vid => this.state.variantsDiscovered[vid]).length;
+    const varSummary = document.createElement('div');
+    varSummary.className = 'codex-variant-summary';
+    varSummary.innerHTML = '<span>VARIANTS: ' + discoveredCount + ' / ' + variantIds.length + '</span>';
+    const boxes = document.createElement('span');
+    boxes.className = 'codex-variant-boxes';
+    variantIds.forEach(vid => {
+      const box = document.createElement('span');
+      box.className = 'codex-variant-box' + (this.state.variantsDiscovered[vid] ? ' filled' : '');
+      boxes.appendChild(box);
     });
+    varSummary.appendChild(boxes);
+    detail.appendChild(varSummary);
 
-    if (entry.counteredBy && entry.counteredBy.length) {
-      const cLabel = document.createElement('div');
-      cLabel.className = 'codex-countered-label';
-      cLabel.textContent = 'COUNTERED BY';
-      detail.appendChild(cLabel);
-      const pills = document.createElement('div');
-      pills.className = 'codex-counter-pills';
-      entry.counteredBy.forEach(id => {
-        const pill = document.createElement('span');
-        pill.className = 'codex-counter-pill';
-        pill.textContent = morphNames[id] || id.toUpperCase();
-        pills.appendChild(pill);
+    detail.appendChild(this._divider());
+
+    // Tabs
+    this._renderTabs(detail, entry.tabs, 'organism');
+
+    detail.appendChild(this._divider());
+
+    // Known variants list
+    if (variantIds.length > 0) {
+      const kvLabel = document.createElement('div');
+      kvLabel.className = 'codex-known-variants-label';
+      kvLabel.textContent = 'KNOWN VARIANTS:';
+      detail.appendChild(kvLabel);
+      variantIds.forEach(vid => {
+        const discovered = this.state.variantsDiscovered[vid];
+        const el = document.createElement('div');
+        el.className = 'codex-known-variant-item' + (discovered ? ' discovered' : '');
+        if (discovered && this.variantData) {
+          const v = this.variantData.variants[vid];
+          el.textContent = v ? v.designation : vid;
+          el.style.cursor = 'pointer';
+          el.addEventListener('click', () => this.selectEntry(vid, 'variant'));
+        } else {
+          el.textContent = '??? \u2014 NOT YET ENCOUNTERED';
+        }
+        detail.appendChild(el);
       });
-      detail.appendChild(pills);
+    }
+  },
+
+  renderVariantDetail(variant) {
+    const detail = document.getElementById('codex-detail');
+    if (!variant) { detail.innerHTML = ''; return; }
+    detail.innerHTML = '';
+    const kills = this.getVariantKillCount(variant.id);
+    const mastery = this.getMastery(kills);
+    const parent = this.codexData ? this.codexData.entries[variant.parentId] : null;
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'codex-detail-name';
+    nameEl.style.color = variant.indicatorColorShift;
+    nameEl.textContent = variant.designation;
+    detail.appendChild(nameEl);
+
+    if (parent) {
+      const parentLink = document.createElement('div');
+      parentLink.className = 'codex-detail-sci';
+      parentLink.textContent = 'Variant of: ' + parent.name;
+      parentLink.style.cursor = 'pointer';
+      parentLink.style.textDecoration = 'underline';
+      parentLink.addEventListener('click', () => this.selectEntry(parent.id, 'organism'));
+      detail.appendChild(parentLink);
     }
 
-    const div2 = document.createElement('div');
-    div2.className = 'codex-divider';
-    div2.style.marginTop = '10px';
-    detail.appendChild(div2);
+    detail.appendChild(this._divider());
 
-    const noteLabel = document.createElement('div');
-    noteLabel.className = 'codex-combat-label';
-    noteLabel.textContent = 'COMBAT INTEL';
-    detail.appendChild(noteLabel);
-    const noteEl = document.createElement('div');
-    noteEl.className = 'codex-combat-note';
-    noteEl.textContent = entry.attackNote;
-    detail.appendChild(noteEl);
+    const masteryEl = document.createElement('div');
+    masteryEl.className = 'codex-mastery';
+    masteryEl.innerHTML = '<span>DEFEATS: ' + kills + '</span>' +
+      '<span class="codex-mastery-dots">' + mastery.dots + '</span>' +
+      '<span class="codex-mastery-label">' + mastery.label + '</span>';
+    detail.appendChild(masteryEl);
+
+    detail.appendChild(this._divider());
+
+    // Tabs for variant: biology note + combat note
+    this._renderTabs(detail, {
+      fieldReport: variant.biologyNote,
+      combatNotes: variant.combatNote,
+    }, 'variant');
+  },
+
+  _renderTabs(container, tabs, type) {
+    const tabBar = document.createElement('div');
+    tabBar.className = 'codex-tabs';
+    const tabKeys = type === 'organism'
+      ? [['fieldReport', 'FIELD REPORT'], ['combatNotes', 'COMBAT NOTES'], ['funFact', 'FUN FACT']]
+      : [['fieldReport', 'BIOLOGY NOTE'], ['combatNotes', 'COMBAT NOTE']];
+
+    const contentArea = document.createElement('div');
+    contentArea.className = 'codex-tab-content';
+
+    const showTab = (key) => {
+      this.activeTab = key;
+      tabBar.querySelectorAll('.codex-tab').forEach(t => t.classList.remove('active'));
+      tabBar.querySelector('[data-tab="' + key + '"]').classList.add('active');
+      const text = tabs[key] || '';
+      contentArea.innerHTML = '';
+      text.split('\n\n').forEach(para => {
+        const p = document.createElement('p');
+        p.textContent = para;
+        contentArea.appendChild(p);
+      });
+    };
+
+    tabKeys.forEach(([key, label]) => {
+      const btn = document.createElement('button');
+      btn.className = 'codex-tab' + (this.activeTab === key ? ' active' : '');
+      btn.setAttribute('data-tab', key);
+      btn.textContent = label;
+      btn.addEventListener('click', () => showTab(key));
+      tabBar.appendChild(btn);
+    });
+
+    container.appendChild(tabBar);
+    container.appendChild(contentArea);
+
+    // Show active tab content
+    showTab(this.activeTab);
+  },
+
+  _divider() {
+    const d = document.createElement('div');
+    d.className = 'codex-divider';
+    return d;
   },
 };
 
@@ -3071,18 +3326,20 @@ const Game = {
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
 
-    // Request fullscreen on first game interaction (hides browser chrome on mobile)
+    // Request fullscreen + lock landscape on first game interaction
     const goFullscreen = () => {
       const el = document.documentElement;
       const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
       if (rfs && !document.fullscreenElement && !document.webkitFullscreenElement) {
-        rfs.call(el).catch(() => {});
+        rfs.call(el).then(() => {
+          try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
+        }).catch(() => {});
       }
     };
 
     document.getElementById('btn-new-game').addEventListener('click', () => { goFullscreen(); this.newGame(); });
     document.getElementById('btn-continue').addEventListener('click', () => { goFullscreen(); this.continueGame(); });
-    document.getElementById('btn-codex').addEventListener('click', () => Codex.open('title-screen'));
+    document.getElementById('btn-codex').addEventListener('click', () => CodexManager.open());
     document.getElementById('close-morph-btn').addEventListener('click', () => this.closeMorph());
     document.getElementById('close-base-btn').addEventListener('click', () => this.closeBase());
 
@@ -3094,8 +3351,8 @@ const Game = {
       speedToggle.classList.toggle('running', !this.isWalkMode);
     });
 
-    // Load codex data asynchronously
-    Codex.load();
+    // Load codex state from localStorage (JSON lazy-loaded on first open)
+    CodexManager.loadState();
 
     // HUD layout editor
     HudEditor.init();
@@ -3816,8 +4073,13 @@ const Game = {
     } else if (tile >= '1' && tile <= '9') {
       const enemyKey = MapData[this.currentMapIndex].encounters[tile];
       if (enemyKey && EnemyData[enemyKey]) {
+        // Roll for variant mutation before battle
+        const encounter = CodexManager.resolveEncounter(enemyKey);
+        if (encounter.variant) {
+          Game.notify('VARIANT DETECTED\n' + encounter.variant.designation, '#fbbf24');
+        }
         this.startTransition(() => {
-          this.startBattle(enemyKey, row, col);
+          this.startBattle(enemyKey, row, col, encounter.variantId, encounter.variant);
         });
       }
     } else if (tile >= 'a' && tile <= 'e') {
@@ -4086,25 +4348,44 @@ const Game = {
      Isometric perspective grid.
      ═══════════════════════════════════════════════════════ */
 
-  startBattle(enemyKey, tileRow, tileCol) {
+  startBattle(enemyKey, tileRow, tileCol, variantId, variant) {
     this.isInBattle = true;
     const enemyDef = EnemyData[enemyKey];
     const morphDef = MorphData[this.currentMorph];
     const levelScale = 1 + this.currentMapIndex * 0.28;
 
+    // Apply variant stat modifiers (multipliers) to battle instance only
+    const vm = variant ? variant.statModifiers : null;
+    const hpMult = vm && vm.hp ? vm.hp : 1;
+    const atkMult = vm && vm.atk ? vm.atk : 1;
+    const spdMult = vm && vm.spd ? vm.spd : 1;
+    const defMult = vm && vm.def ? vm.def : 1;
+
+    // Determine complement state: base vulnerability can be overridden by variant complementResistance
+    let complementActive = enemyDef.complementVulnerable;
+    let complementDmgMult = 1;
+    if (vm && vm.complementResistance !== undefined) {
+      if (vm.complementResistance >= 1.0) complementActive = false;
+      else complementDmgMult = 1 - vm.complementResistance;
+    }
+
+    const scaledHp = Math.floor(enemyDef.hp * levelScale * hpMult);
+
     this.battle = {
       enemy: {
         ...enemyDef,
-        currentHp: Math.floor(enemyDef.hp * levelScale),
-        maxHp: Math.floor(enemyDef.hp * levelScale),
-        scaledAtk: Math.floor(enemyDef.atk * levelScale),
-        currentDef: enemyDef.def,
+        currentHp: scaledHp,
+        maxHp: scaledHp,
+        scaledAtk: Math.floor(enemyDef.atk * levelScale * atkMult),
+        currentDef: Math.floor(enemyDef.def * defMult),
+        spd: enemyDef.spd * spdMult,
+        moveSpeed: Math.floor(enemyDef.moveSpeed / spdMult),
         isDebuffed: false,
-        gridRow: 2, // center row (of 4)
-        gridCol: 6, // enemy side (of 8)
+        gridRow: 2,
+        gridCol: 6,
         moveTimer: 0,
-        normalCooldown: 0,    // ms until next normal attack
-        specialCooldown: 3000, // start with 3s delay so enemy doesn't insta-special
+        normalCooldown: 0,
+        specialCooldown: 3000,
         bullets: [],
         hitFlash: 0,
         deathTimer: 0,
@@ -4117,24 +4398,57 @@ const Game = {
         bullets: [],
         skillCooldowns: morphDef.skills.map(() => 0),
         hitFlash: 0,
-        attackAnim: null, // { type: 'gun'|'melee', timer: 0, duration: 400|500 }
+        attackAnim: null,
       },
       complementTimer: 0,
-      complementDamage: Math.floor(3 * (1 + (this.player.compBonus || 0))),
-      complementActive: enemyDef.complementVulnerable,
+      complementDamage: Math.floor(3 * (1 + (this.player.compBonus || 0)) * complementDmgMult),
+      complementActive,
       complementShimmerTimer: 0,
       enemyKey,
+      variantId: variantId || null,
+      variant: variant || null,
       tileRow, tileCol,
       elapsedTime: 0,
       isWon: false,
       particles: [],
+      // Variant special mechanics
+      defShieldActive: false,
+      defShieldUsed: false,
+      defShieldTimer: 0,
+      memoryTagImmune: !!(vm && vm.memoryTagImmune),
+      phagocytosisImmuneDuration: (vm && vm.phagocytosisImmuneDuration) || 0,
+      antigenScanResistsFirstUse: !!(vm && vm.antigenScanResistsFirstUse),
+      antigenScanUsed: false,
+      netTrapReducedEffect: !!(vm && vm.netTrapReducedEffect),
     };
 
+    // Apply variant special attack modifiers
+    if (variant && variant.specialAttackModifier) {
+      const sam = variant.specialAttackModifier;
+      if (sam.cooldown) {
+        this.battle.enemy.attacks = JSON.parse(JSON.stringify(enemyDef.attacks));
+        this.battle.enemy.attacks.special.cooldown = Math.floor(enemyDef.attacks.special.cooldown * sam.cooldown);
+      }
+      if (sam.damage) {
+        if (!this.battle.enemy.attacks) this.battle.enemy.attacks = JSON.parse(JSON.stringify(enemyDef.attacks));
+        this.battle.enemy.attacks.special.damage = enemyDef.attacks.special.damage * sam.damage;
+      }
+      if (sam.pattern) {
+        if (!this.battle.enemy.attacks) this.battle.enemy.attacks = JSON.parse(JSON.stringify(enemyDef.attacks));
+        this.battle.enemy.attacks.special.pattern = sam.pattern;
+      }
+    }
+
+    // Def shield trigger thresholds from variant
+    if (vm && vm.defShieldAt50Pct) this.battle.defShieldThreshold = 0.5;
+    if (vm && vm.defShieldAt60Pct) this.battle.defShieldThreshold = 0.6;
+
     // Battle HUD
-    document.getElementById('battle-enemy-name').textContent = enemyDef.name;
+    const displayName = variant ? variant.designation : enemyDef.name;
+    document.getElementById('battle-enemy-name').textContent = displayName;
     const compLabel = document.getElementById('battle-complement-label');
-    compLabel.textContent = enemyDef.complementVulnerable ? 'COMPLEMENT ACTIVE' : 'COMPLEMENT RESISTED';
-    compLabel.style.color = enemyDef.complementVulnerable ? '#fbbf24' : '#ef4444';
+    compLabel.textContent = complementActive ? 'COMPLEMENT ACTIVE' : 'COMPLEMENT RESISTED';
+    compLabel.style.color = complementActive ? '#fbbf24' : '#ef4444';
     document.getElementById('battle-hud-bar').classList.add('visible');
 
     this.updateBattleHUD();
@@ -4288,6 +4602,8 @@ const Game = {
       bt.complementShimmerTimer += deltaTime;
       if (bt.complementTimer >= 1400) {
         bt.complementTimer = 0;
+        if (bt.defShieldActive) { /* shield blocks complement too */ }
+        else {
         const compDmg = bt.complementDamage;
         enemy.currentHp = Math.max(0, enemy.currentHp - compDmg);
         enemy.hitFlash = 120;
@@ -4321,6 +4637,7 @@ const Game = {
             lifetime: 400, elapsed: 0,
           });
         }
+        } // end else (not shield-blocked)
       }
     }
 
@@ -4350,6 +4667,21 @@ const Game = {
     });
     player.bullets = player.bullets.filter(b => b.elapsed < b.lifetime && b.x < this.canvasWidth + 40 && b.x > -40);
 
+    // ─── Variant def shield check ───
+    if (bt.defShieldThreshold && !bt.defShieldUsed && enemy.currentHp <= enemy.maxHp * bt.defShieldThreshold) {
+      bt.defShieldActive = true;
+      bt.defShieldUsed = true;
+      bt.defShieldTimer = 5000; // 5 seconds
+      this.notify('DAMAGE SHIELD ACTIVE!', '#ef4444');
+    }
+    if (bt.defShieldActive) {
+      bt.defShieldTimer -= deltaTime;
+      if (bt.defShieldTimer <= 0) {
+        bt.defShieldActive = false;
+        this.notify('SHIELD DISSOLVED', '#22c55e');
+      }
+    }
+
     // ─── Player bullet → enemy collision ───
     const enemyPos = this.getTileCenter(enemy.gridRow, enemy.gridCol);
     const hitRadius = 22;
@@ -4361,6 +4693,8 @@ const Game = {
         if (bullet.trueDamage) damage = bullet.rawDamage || damage;
         if (bullet.antiParasite && enemy.isLarge) damage *= 3;
         if (bullet.isExecute && enemy.currentHp < enemy.maxHp * 0.25) damage = enemy.currentHp;
+        // Def shield blocks all non-AoE/non-trueDamage
+        if (bt.defShieldActive && !bullet.trueDamage && !bullet.isAoE) damage = 0;
         enemy.currentHp = Math.max(0, Math.floor(enemy.currentHp - damage));
         enemy.hitFlash = 150;
         this.screenShake = 4;
@@ -4856,8 +5190,10 @@ const Game = {
       const enemySize = 68; // unified with player sprite size
       const wobble = Math.sin(this.frameCount * 0.05) * 1.5;
 
-      // Enemy type indicator — colored glow tile (red=bacteria, orange=virus, etc.)
-      const enemyIndicatorColor = bt.enemy.color || '#f87171';
+      // Enemy type indicator — colored glow tile; variant shifts color subtly
+      const enemyIndicatorColor = (this.battle.variant && this.battle.variant.indicatorColorShift)
+        ? this.battle.variant.indicatorColorShift
+        : (bt.enemy.color || '#f87171');
       drawEntityIndicator(ctx, enemyPos.x, enemyPos.y + enemySize * 0.1,
         enemySize, enemyIndicatorColor, this.frameCount * 0.05);
 
@@ -5176,7 +5512,7 @@ const Game = {
     // ─── Damage skills — straight-line attacks (shoot RIGHT) ───
     let baseDmg = skill.damage + Math.floor(playerAtk * 0.4);
     if (!skill.trueDamage) baseDmg = Math.max(1, baseDmg - enemyDefense);
-    const memoryMul = this.memoryTags[enemy.type] ? 1.5 : 1;
+    const memoryMul = (this.memoryTags[enemy.type] && !this.battle.memoryTagImmune) ? 1.5 : 1;
     const finalDmg = Math.floor(baseDmg * memoryMul);
 
     if (skill.isAoE) {
@@ -5245,10 +5581,10 @@ const Game = {
     Audio.sfxKill();
     this.notify(`Victory! +${xpGain} XP +${atpGain} ATP`, '#166534');
 
-    // Unlock codex entry for this enemy
-    if (this.battle.enemyKey && !this.defeatedEnemies[this.battle.enemyKey]) {
+    // Update codex — record kill for base enemy and variant
+    if (this.battle.enemyKey) {
       this.defeatedEnemies[this.battle.enemyKey] = true;
-      this.notify('CODEX UNLOCKED: ' + enemy.name, '#fbbf24');
+      CodexManager.recordKill(this.battle.enemyKey, this.battle.variantId);
     }
 
     // Level up
@@ -5428,6 +5764,19 @@ const Game = {
       body.appendChild(card);
     });
 
+    // Codex button — only show when at least one entry discovered
+    if (CodexManager.hasAnyDiscovered()) {
+      const codexBtn = document.createElement('button');
+      codexBtn.className = 'upgrade-buy-btn';
+      codexBtn.style.cssText = 'width:100%;padding:12px;margin:10px 0;font-size:12px;letter-spacing:3px;color:#fbbf24;border-color:#fbbf24;background:rgba(251,191,36,0.08);cursor:pointer';
+      codexBtn.textContent = 'FIELD INTELLIGENCE';
+      codexBtn.addEventListener('click', () => {
+        this.closeBase();
+        CodexManager.open();
+      });
+      body.appendChild(codexBtn);
+    }
+
     // Memory tags
     const taggedTypes = Object.keys(this.memoryTags).filter(k => this.memoryTags[k]);
     if (taggedTypes.length > 0) {
@@ -5470,7 +5819,24 @@ const Game = {
    ╚═══════════════════════════════════════════════════════════════╝ */
 
 window.addEventListener('DOMContentLoaded', () => {
-  // Lock to landscape silently — fails gracefully on desktop/unsupported browsers
+  // Auto fullscreen + landscape on first user gesture (browsers require a gesture)
+  const autoFullscreen = () => {
+    const el = document.documentElement;
+    const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (rfs && !document.fullscreenElement && !document.webkitFullscreenElement) {
+      rfs.call(el).then(() => {
+        try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
+      }).catch(() => {});
+    } else {
+      try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
+    }
+    document.removeEventListener('click', autoFullscreen, true);
+    document.removeEventListener('touchstart', autoFullscreen, true);
+  };
+  document.addEventListener('click', autoFullscreen, true);
+  document.addEventListener('touchstart', autoFullscreen, true);
+
+  // Also try immediately (works in some PWA contexts)
   try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
   Game.init();
 });
